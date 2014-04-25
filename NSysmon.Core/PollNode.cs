@@ -14,6 +14,8 @@ namespace NSysmon.Core
     /// </remarks>
     public abstract class PollNode : IMonitorStatus, IDisposable, IEquatable<PollNode>
     {
+        private static log4net.ILog Logger = log4net.LogManager.GetLogger(typeof(PollNode));
+
         private int _totalPolls;
         private int _totalCachePolls;
 
@@ -123,6 +125,7 @@ namespace NSysmon.Core
         /// </summary>
         private void InnerPoll(bool force = false)
         {
+            Logger.DebugFormat("Starting Poll of Node [{0} - {1}]", this.NodeType, this.UniqueKey);
             var sw = Stopwatch.StartNew();
             try
             {
@@ -143,6 +146,7 @@ namespace NSysmon.Core
                 LastPollDuration = sw.Elapsed;
                 _isPolling = false;
                 _pollTask = null;
+                Logger.DebugFormat("End Poll of Node [{0} - {1}] in {2} ms.", this.NodeType, this.UniqueKey, LastPollDuration.TotalMilliseconds.ToString("N2"));
             }
         }
 
@@ -164,6 +168,7 @@ namespace NSysmon.Core
             {
                 try
                 {
+                    Logger.DebugFormat("Getting Poller Data [{0}]", description);
                     cache.Data = getData();
                     cache.LastSuccess = cache.LastPoll = DateTime.UtcNow;
                     cache.ErrorMessage = "";
@@ -186,6 +191,7 @@ namespace NSysmon.Core
                     {
                         cache.ErrorMessage += "\n" + e.InnerException.Message;
                     }
+                    Logger.Error(cache.ErrorMessage, e);
                 }
                 CachedMonitorStatus = null;
             };

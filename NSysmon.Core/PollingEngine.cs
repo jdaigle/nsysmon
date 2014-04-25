@@ -13,6 +13,8 @@ namespace NSysmon.Core
     /// </remarks>
     public class PollingEngine
     {
+        protected static log4net.ILog Logger = log4net.LogManager.GetLogger(typeof(PollingEngine));
+
         private static readonly object _addLock = new object();
 
         public static HashSet<PollNode> AllPollNodes;
@@ -40,7 +42,12 @@ namespace NSysmon.Core
         {
             lock (_addLock)
             {
-                return AllPollNodes.Add(node);
+                var added = AllPollNodes.Add(node);
+                if (added)
+                {
+                    Logger.InfoFormat("PollNode [{0} - {1}] added.", node.NodeType, node.UniqueKey);
+                }
+                return added;
             }
         }
 
@@ -74,6 +81,7 @@ namespace NSysmon.Core
             if (!_globalPollingThread.IsAlive)
             {
                 _globalPollingThread.Start();
+                Logger.Info("Global Polling Thread Started");
             }
         }
 
@@ -83,6 +91,7 @@ namespace NSysmon.Core
         public static void StopPolling()
         {
             _shuttingDown = true;
+            Logger.Info("Shutting Down Global Polling Thread");
         }
 
         private static void MonitorPollingLoop()
