@@ -170,7 +170,7 @@ namespace NSysmon.Core
 
             if (cacheGuid.HasValue)
             {
-                var cache = node.DataPollers.FirstOrDefault(p => p.UniqueId == cacheGuid);
+                var cache = node.DataCaches.FirstOrDefault(p => p.UniqueId == cacheGuid);
                 return cache != null && cache.Poll(true) > 0;
             }
             // Polling an entire server

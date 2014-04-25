@@ -23,7 +23,7 @@ namespace NSysmon.Core.WMI
             this.settings = settings;
         }
 
-        public override IEnumerable<DataPoller> DataPollers
+        public override IEnumerable<PollNodeDataCache> DataCaches
         {
             get
             {
@@ -31,6 +31,11 @@ namespace NSysmon.Core.WMI
                 yield return Win32Volumes;
                 yield return PingPoller;
                 yield return PerfOSProcessor;
+                yield return PerfOSMemory;
+                yield return PerfOSPagingFiles;
+                yield return PerfOSSystem;
+                yield return PerfDiskPhysicalDisks;
+                yield return TcpipNetworkInterfaces;
             }
         }
 
@@ -44,14 +49,14 @@ namespace NSysmon.Core.WMI
             return null;
         }
 
-        private DataPoller<List<PerfOSProcessor>> _perfOSProcessor;
-        public DataPoller<List<PerfOSProcessor>> PerfOSProcessor
+        private PollNodeDataCode<List<PerfOSProcessor>> _perfOSProcessor;
+        public PollNodeDataCode<List<PerfOSProcessor>> PerfOSProcessor
         {
             get
             {
-                return _perfOSProcessor ?? (_perfOSProcessor = new DataPoller<List<PerfOSProcessor>>()
+                return _perfOSProcessor ?? (_perfOSProcessor = new PollNodeDataCode<List<PerfOSProcessor>>()
                 {
-                    UpdateCachedData = UpdateDataPollerCachedData(
+                    UpdateCachedData = UpdateCachedData(
                         description: string.Format("WMI Query Win32_PerfFormattedData_PerfOS_Processor On Computer {0} ", settings.Host),
                         getData: () => Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
                             "select Name, PercentProcessorTime from Win32_PerfFormattedData_PerfOS_Processor",
@@ -65,15 +70,125 @@ namespace NSysmon.Core.WMI
             }
         }
 
-        private DataPoller<List<Win32Volume>> _win32Volumes;
-        public DataPoller<List<Win32Volume>> Win32Volumes
+        private PollNodeDataCode<PerfOSMemory> _perfOSMemory;
+        public PollNodeDataCode<PerfOSMemory> PerfOSMemory
         {
             get
             {
-                return _win32Volumes ?? (_win32Volumes = new DataPoller<List<Win32Volume>>()
+                return _perfOSMemory ?? (_perfOSMemory = new PollNodeDataCode<PerfOSMemory>()
+                {
+                    UpdateCachedData = UpdateCachedData(
+                        description: string.Format("WMI Query Win32_PerfFormattedData_PerfOS_Memory On Computer {0} ", settings.Host),
+                        getData: () => Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
+                            "select AvailableBytes, AvailableMBytes from Win32_PerfFormattedData_PerfOS_Memory",
+                            results => results.Select(mo => new PerfOSMemory()
+                            {
+                                AvailableBytes = (UInt64)mo["AvailableBytes"],
+                                AvailableMBytes = (UInt64)mo["AvailableMBytes"],
+                            })).Data.Single()
+                    ),
+                });
+            }
+        }
+
+        private PollNodeDataCode<List<PerfDiskPhysicalDisk>> _perfDiskPhysicalDisk;
+        public PollNodeDataCode<List<PerfDiskPhysicalDisk>> PerfDiskPhysicalDisks
+        {
+            get
+            {
+                return _perfDiskPhysicalDisk ?? (_perfDiskPhysicalDisk = new PollNodeDataCode<List<PerfDiskPhysicalDisk>>()
+                {
+                    UpdateCachedData = UpdateCachedData(
+                        description: string.Format("WMI Query Win32_PerfFormattedData_PerfDisk_PhysicalDisk On Computer {0} ", settings.Host),
+                        getData: () => Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
+                            "select AvgDiskSecPerRead, AvgDiskSecPerWrite, DiskReadsPerSec, DiskWritesPerSec, name from Win32_PerfFormattedData_PerfDisk_PhysicalDisk",
+                            results => results.Select(mo => new PerfDiskPhysicalDisk()
+                            {
+                                Name = (mo["name"] ?? string.Empty).ToString(),
+                                AvgDiskSecPerRead = (UInt32)mo["AvgDiskSecPerRead"],
+                                AvgDiskSecPerWrite = (UInt32)mo["AvgDiskSecPerWrite"],
+                                DiskReadsPerSec = (UInt32)mo["DiskReadsPerSec"],
+                                DiskWritesPerSec = (UInt32)mo["DiskWritesPerSec"],
+                            })).Data.ToList()
+                    ),
+                });
+            }
+        }
+
+        private PollNodeDataCode<List<TcpipNetworkInterface>> _tcpipNetworkInterface;
+        public PollNodeDataCode<List<TcpipNetworkInterface>> TcpipNetworkInterfaces
+        {
+            get
+            {
+                return _tcpipNetworkInterface ?? (_tcpipNetworkInterface = new PollNodeDataCode<List<TcpipNetworkInterface>>()
+                {
+                    UpdateCachedData = UpdateCachedData(
+                        description: string.Format("WMI Query Win32_PerfFormattedData_Tcpip_NetworkInterface On Computer {0} ", settings.Host),
+                        getData: () => Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
+                            "select Name, BytesReceivedPerSec, BytesSentPerSec, CurrentBandwidth from Win32_PerfFormattedData_Tcpip_NetworkInterface",
+                            results => results.Select(mo => new TcpipNetworkInterface()
+                            {
+                                Name = (mo["name"] ?? string.Empty).ToString(),
+                                BytesReceivedPerSec = (UInt64)mo["BytesReceivedPerSec"],
+                                BytesSentPerSec = (UInt64)mo["BytesSentPerSec"],
+                                CurrentBandwidth = (UInt64)mo["CurrentBandwidth"],
+                            })).Data.ToList()
+                    ),
+                });
+            }
+        }
+
+        private PollNodeDataCode<List<PerfOSPagingFile>> _perfOSPagingFiles;
+        public PollNodeDataCode<List<PerfOSPagingFile>> PerfOSPagingFiles
+        {
+            get
+            {
+                return _perfOSPagingFiles ?? (_perfOSPagingFiles = new PollNodeDataCode<List<PerfOSPagingFile>>()
+                {
+                    UpdateCachedData = UpdateCachedData(
+                        description: string.Format("WMI Query Win32_PerfFormattedData_PerfOS_PagingFile On Computer {0} ", settings.Host),
+                        getData: () => Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
+                            "select PercentUsage, name from Win32_PerfFormattedData_PerfOS_PagingFile",
+                            results => results.Select(mo => new PerfOSPagingFile()
+                            {
+                                Name = (mo["name"] ?? string.Empty).ToString(),
+                                PercentUsage = (UInt32)mo["PercentUsage"],
+                            })).Data.ToList()
+                    ),
+                });
+            }
+        }
+
+        private PollNodeDataCode<PerfOSSystem> _perfOSSystem;
+        public PollNodeDataCode<PerfOSSystem> PerfOSSystem
+        {
+            get
+            {
+                return _perfOSSystem ?? (_perfOSSystem = new PollNodeDataCode<PerfOSSystem>()
+                {
+                    UpdateCachedData = UpdateCachedData(
+                        description: string.Format("WMI Query Win32_PerfFormattedData_PerfOS_System On Computer {0} ", settings.Host),
+                        getData: () => Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
+                            "select ProcessorQueueLength, name from Win32_PerfFormattedData_PerfOS_System",
+                            results => results.Select(mo => new PerfOSSystem()
+                            {
+                                Name = (mo["name"] ?? string.Empty).ToString(),
+                                ProcessorQueueLength = (UInt32)mo["ProcessorQueueLength"],
+                            })).Data.Single()
+                    ),
+                });
+            }
+        }
+
+        private PollNodeDataCode<List<Win32Volume>> _win32Volumes;
+        public PollNodeDataCode<List<Win32Volume>> Win32Volumes
+        {
+            get
+            {
+                return _win32Volumes ?? (_win32Volumes = new PollNodeDataCode<List<Win32Volume>>()
                 {
                     CacheForSeconds = 60 * 15, // 15 minutes
-                    UpdateCachedData = UpdateDataPollerCachedData(
+                    UpdateCachedData = UpdateCachedData(
                         description: string.Format("WMI Query Win32_Volume On Computer {0} ", settings.Host),
                         getData: () => Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
                             "select name, label, drivetype, driveletter, capacity, freespace, filesystem from Win32_Volume",
@@ -92,15 +207,15 @@ namespace NSysmon.Core.WMI
             }
         }
 
-        private DataPoller<Win32ComputerSystem> _win32ComputerSystem;
-        public DataPoller<Win32ComputerSystem> Win32ComputerSystem
+        private PollNodeDataCode<Win32ComputerSystem> _win32ComputerSystem;
+        public PollNodeDataCode<Win32ComputerSystem> Win32ComputerSystem
         {
             get
             {
-                return _win32ComputerSystem ?? (_win32ComputerSystem = new DataPoller<Win32ComputerSystem>()
+                return _win32ComputerSystem ?? (_win32ComputerSystem = new PollNodeDataCode<Win32ComputerSystem>()
                 {
                     CacheForSeconds = 60 * 60, // 1 hour
-                    UpdateCachedData = UpdateDataPollerCachedData(
+                    UpdateCachedData = UpdateCachedData(
                         description: string.Format("WMI Query Win32_ComputerSystem/Win32_OperatingSystem On Computer {0} ", settings.Host),
                         getData: () =>
                             {
@@ -139,16 +254,16 @@ namespace NSysmon.Core.WMI
             }
         }
 
-        private DataPoller<System.Net.NetworkInformation.PingReply> _pingPoller;
+        private PollNodeDataCode<System.Net.NetworkInformation.PingReply> _pingPoller;
         private System.Net.NetworkInformation.Ping pinger = new System.Net.NetworkInformation.Ping();
-        public DataPoller<System.Net.NetworkInformation.PingReply> PingPoller
+        public PollNodeDataCode<System.Net.NetworkInformation.PingReply> PingPoller
         {
             get
             {
-                return _pingPoller ?? (_pingPoller = new DataPoller<System.Net.NetworkInformation.PingReply>()
+                return _pingPoller ?? (_pingPoller = new PollNodeDataCode<System.Net.NetworkInformation.PingReply>()
                 {
                     //CacheForSeconds = 10,
-                    UpdateCachedData = UpdateDataPollerCachedData(
+                    UpdateCachedData = UpdateCachedData(
                         description: string.Format("Ping host {0} ", settings.Host),
                         getData: () =>
                             {

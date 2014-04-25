@@ -21,7 +21,7 @@ namespace NSysmon.Core
 
         public abstract int MinSecondsBetweenPolls { get; }
         public abstract string NodeType { get; }
-        public abstract IEnumerable<DataPoller> DataPollers { get; }
+        public abstract IEnumerable<PollNodeDataCache> DataCaches { get; }
         protected abstract IEnumerable<MonitorStatus> GetMonitorStatus();
         protected abstract string GetMonitorStatusReason();
 
@@ -73,7 +73,7 @@ namespace NSysmon.Core
                             return CachedMonitorStatus.Value;
                         }
 
-                        var pollers = DataPollers.Where(dp => dp.AffectsNodeStatus).ToList();
+                        var pollers = DataCaches.Where(dp => dp.AffectsNodeStatus).ToList();
                         var fetchStatus = pollers.GetWorstStatus();
                         if (fetchStatus != MonitorStatus.Good)
                         {
@@ -130,7 +130,7 @@ namespace NSysmon.Core
             try
             {
                 var polled = 0;
-                Parallel.ForEach(DataPollers, i =>
+                Parallel.ForEach(DataCaches, i =>
                 {
                     var pollerResult = i.Poll(force);
                     Interlocked.Add(ref polled, pollerResult);
@@ -157,12 +157,12 @@ namespace NSysmon.Core
         /// <param name="description">Description of the operation, used purely for profiling</param>
         /// <param name="getData">The operation used to actually get data, e.g. <code>using (var conn = GetConnection()) { return getFromConnection(conn); }</code></param>
         /// <param name="logExceptions">Whether to log any exceptions to the log</param>
-        /// <param name="addExceptionData">Optionally add exception data, e.g. <code>e => e.AddLoggedData("Server", Name)</code></param>
         /// <returns>A cache update action, used when creating a <see cref="Cache"/>.</returns>
-        protected Action<DataPoller<T>> UpdateDataPollerCachedData<T>(string description,
-                                                                      Func<T> getData,
-                                                                      bool logExceptions = false,
-                                                                      Action<Exception> addExceptionData = null) where T : class
+        /// <param name="addExceptionData">Optionally add exception data, e.g. <code>e => e.AddLoggedData("Server", Name)</code></param>
+        protected Action<PollNodeDataCode<T>> UpdateCachedData<T>(string description,
+                                                            Func<T> getData,
+                                                            bool logExceptions = false,
+                                                            Action<Exception> addExceptionData = null) where T : class
         {
             return cache =>
             {

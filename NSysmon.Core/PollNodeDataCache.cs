@@ -13,7 +13,7 @@ namespace NSysmon.Core
     /// This code is derived from https://github.com/opserver/Opserver/tree/a170ea8bcda9f9e52d4aaff7339f3d198309369b
     /// under "The MIT License (MIT)". Copyright (c) 2013 Stack Exchange Inc.
     /// </remarks>
-    public abstract class DataPoller : IMonitorStatus
+    public abstract class PollNodeDataCache : IMonitorStatus
     {
         /// <summary>
         /// Info for monitoring the monitoring, debugging, etc.
@@ -21,7 +21,7 @@ namespace NSysmon.Core
         public string ParentMemberName { get; protected set; }
         public string SourceFilePath { get; protected set; }
         public int SourceLineNumber { get; protected set; }
-        protected DataPoller([CallerMemberName] string memberName = "",
+        protected PollNodeDataCache([CallerMemberName] string memberName = "",
                              [CallerFilePath] string sourceFilePath = "",
                              [CallerLineNumber] int sourceLineNumber = 0)
         {
@@ -81,7 +81,7 @@ namespace NSysmon.Core
 
         public abstract bool ContainsCachedData { get; }
         public abstract object CachedData { get; }
-        public virtual Type Type { get { return typeof(DataPoller); } }
+        public virtual Type Type { get { return typeof(PollNodeDataCache); } }
 
         public abstract int Poll(bool force = false);
     }
@@ -90,7 +90,7 @@ namespace NSysmon.Core
     /// This code is derived from https://github.com/opserver/Opserver/tree/a170ea8bcda9f9e52d4aaff7339f3d198309369b
     /// under "The MIT License (MIT)". Copyright (c) 2013 Stack Exchange Inc.
     /// </remarks>
-    public class DataPoller<T> : DataPoller where T : class
+    public class PollNodeDataCode<T> : PollNodeDataCache where T : class
     {
         public override bool ContainsCachedData { get { return cachedData != null; } }
         public override object CachedData { get { return cachedData; } }
@@ -113,7 +113,7 @@ namespace NSysmon.Core
         /// <summary>
         /// Action to call to update the cached data during a Poll loop.
         /// </summary>
-        public Action<DataPoller<T>> UpdateCachedData { get; set; }
+        public Action<PollNodeDataCode<T>> UpdateCachedData { get; set; }
 
         public override int Poll(bool force = false)
         {

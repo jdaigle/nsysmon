@@ -9,8 +9,8 @@ namespace NSysmon.Core.WMI
     public class TcpipNetworkInterface
     {
         public string Name { get; set; }
-        public UInt32 BytesReceivedPerSec { get; set; }
-        public UInt32 BytesSentPerSec { get; set; }
-        public UInt32 CurrentBandwidth { get; set; }
+        public UInt64 BytesReceivedPerSec { get; set; }
+        public UInt64 BytesSentPerSec { get; set; }
+        public UInt64 CurrentBandwidth { get; set; }
     }
 }
