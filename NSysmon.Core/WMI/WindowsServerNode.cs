@@ -260,20 +260,27 @@ namespace NSysmon.Core.WMI
             }
         }
 
-        private PollNodeDataCode<System.Net.NetworkInformation.PingReply> _pingPoller;
+        private PollNodeDataCode<PingResult> _pingPoller;
         private System.Net.NetworkInformation.Ping pinger = new System.Net.NetworkInformation.Ping();
-        public PollNodeDataCode<System.Net.NetworkInformation.PingReply> PingPoller
+        public PollNodeDataCode<PingResult> PingPoller
         {
             get
             {
-                return _pingPoller ?? (_pingPoller = new PollNodeDataCode<System.Net.NetworkInformation.PingReply>()
+                return _pingPoller ?? (_pingPoller = new PollNodeDataCode<PingResult>()
                 {
                     CacheTrendForSeconds = 60 * 5, // 5 minutes
                     UpdateCachedData = UpdateCachedData(
                         description: string.Format("Ping host {0} ", settings.Host),
                         getData: () =>
                             {
-                                return pinger.Send(settings.Host);
+                                var p = pinger.Send(settings.Host);
+                                return new PingResult
+                                {
+                                    RoundtripTime = p.RoundtripTime,
+                                    Ttl = p.Options.Ttl,
+                                    BufferLength = p.Buffer.Length,
+                                    Status = p.Status.ToString(),
+                                };
                             }
                     ),
                 });

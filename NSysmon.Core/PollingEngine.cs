@@ -53,7 +53,7 @@ namespace NSysmon.Core
 
         public static bool TryRemove(PollNode node)
         {
-            if (node == null || !node.AddedToGlobalPollers)
+            if (node == null)
             {
                 return false;
             }

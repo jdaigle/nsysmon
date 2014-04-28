@@ -34,11 +34,6 @@ namespace NSysmon.Core
         /// </summary>
         protected virtual TimeSpan BackoffDuration { get { return TimeSpan.FromMinutes(2); } }
 
-        /// <summary>
-        /// Indicates if this was added to the global poller list, if false that means this is a duplicate
-        /// and should not be used anywhere, you lost the race, let it go.
-        /// </summary>
-        public bool AddedToGlobalPollers { get; private set; }
         public string UniqueKey { get; private set; }
 
         protected PollNode(string uniqueKey)

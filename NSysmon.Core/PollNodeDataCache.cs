@@ -35,6 +35,7 @@ namespace NSysmon.Core
 
         public int? CacheFailureForSeconds { get; set; }
         public int CacheForSeconds { get; set; }
+        public int CacheTrendForSeconds { get; set; }
 
         protected long _pollsTotal;
         protected long _pollsSuccessful;
@@ -81,6 +82,7 @@ namespace NSysmon.Core
 
         public abstract bool ContainsCachedData { get; }
         public abstract object CachedData { get; }
+        public abstract IEnumerable<Tuple<DateTime, object>> CachedTrendData { get; }
         public virtual Type Type { get { return typeof(PollNodeDataCache); } }
 
         public abstract int Poll(bool force = false);
@@ -110,11 +112,14 @@ namespace NSysmon.Core
             internal set { cachedData = value; }
         }
 
-        public int CacheTrendForSeconds { get; set; }
         private List<Tuple<DateTime, T>> cachedTrendData = new List<Tuple<DateTime, T>>();
         public IReadOnlyList<Tuple<DateTime, T>> TrendData
         {
             get { return cachedTrendData.AsReadOnly(); }
+        }
+        public override IEnumerable<Tuple<DateTime, object>> CachedTrendData
+        {
+            get { return cachedTrendData.Select(x => new Tuple<DateTime, object>(x.Item1, x.Item2)); }
         }
 
         /// <summary>

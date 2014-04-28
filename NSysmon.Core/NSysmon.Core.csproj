@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PingResult.cs" />
     <Compile Include="PollNodeDataCache.cs" />
     <Compile Include="DateTimeExtensions.cs" />
     <Compile Include="ExceptionManager.cs" />
