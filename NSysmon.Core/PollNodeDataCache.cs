@@ -110,6 +110,13 @@ namespace NSysmon.Core
             internal set { cachedData = value; }
         }
 
+        public int CacheTrendForSeconds { get; set; }
+        private List<Tuple<DateTime, T>> cachedTrendData = new List<Tuple<DateTime, T>>();
+        public IReadOnlyList<Tuple<DateTime, T>> TrendData
+        {
+            get { return cachedTrendData.AsReadOnly(); }
+        }
+
         /// <summary>
         /// Action to call to update the cached data during a Poll loop.
         /// </summary>
@@ -143,7 +150,16 @@ namespace NSysmon.Core
                                      : PollStatus.Fail;
                 NeedsPoll = false;
                 if (cachedData != null)
+                {
                     Interlocked.Increment(ref _pollsSuccessful);
+                    if (LastSuccess.HasValue)
+                    {
+                        this.cachedTrendData.Add(new Tuple<DateTime, T>(LastSuccess.Value, cachedData));
+                        var cacheTrendForSeconds = Math.Max(CacheForSeconds, CacheTrendForSeconds);
+                        var minCacheDate = DateTime.UtcNow.AddSeconds((cacheTrendForSeconds * -1));
+                        this.cachedTrendData.RemoveAll(x => x.Item1 < minCacheDate);
+                    }
+                }
                 return cachedData != null ? 1 : 0;
             }
             catch (Exception e)

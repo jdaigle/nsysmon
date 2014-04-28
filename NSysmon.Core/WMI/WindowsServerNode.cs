@@ -56,6 +56,7 @@ namespace NSysmon.Core.WMI
             {
                 return _perfOSProcessor ?? (_perfOSProcessor = new PollNodeDataCode<List<PerfOSProcessor>>()
                 {
+                    CacheTrendForSeconds = 60 * 5, // 5 minutes
                     UpdateCachedData = UpdateCachedData(
                         description: string.Format("WMI Query Win32_PerfFormattedData_PerfOS_Processor On Computer {0} ", settings.Host),
                         getData: () => Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
@@ -77,6 +78,7 @@ namespace NSysmon.Core.WMI
             {
                 return _perfOSMemory ?? (_perfOSMemory = new PollNodeDataCode<PerfOSMemory>()
                 {
+                    CacheTrendForSeconds = 60 * 5, // 5 minutes
                     UpdateCachedData = UpdateCachedData(
                         description: string.Format("WMI Query Win32_PerfFormattedData_PerfOS_Memory On Computer {0} ", settings.Host),
                         getData: () => Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
@@ -98,6 +100,7 @@ namespace NSysmon.Core.WMI
             {
                 return _perfDiskPhysicalDisk ?? (_perfDiskPhysicalDisk = new PollNodeDataCode<List<PerfDiskPhysicalDisk>>()
                 {
+                    CacheTrendForSeconds = 60 * 5, // 5 minutes
                     UpdateCachedData = UpdateCachedData(
                         description: string.Format("WMI Query Win32_PerfFormattedData_PerfDisk_PhysicalDisk On Computer {0} ", settings.Host),
                         getData: () => Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
@@ -122,6 +125,7 @@ namespace NSysmon.Core.WMI
             {
                 return _tcpipNetworkInterface ?? (_tcpipNetworkInterface = new PollNodeDataCode<List<TcpipNetworkInterface>>()
                 {
+                    CacheTrendForSeconds = 60 * 5, // 5 minutes
                     UpdateCachedData = UpdateCachedData(
                         description: string.Format("WMI Query Win32_PerfFormattedData_Tcpip_NetworkInterface On Computer {0} ", settings.Host),
                         getData: () => Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
@@ -145,6 +149,7 @@ namespace NSysmon.Core.WMI
             {
                 return _perfOSPagingFiles ?? (_perfOSPagingFiles = new PollNodeDataCode<List<PerfOSPagingFile>>()
                 {
+                    CacheTrendForSeconds = 60 * 5, // 5 minutes
                     UpdateCachedData = UpdateCachedData(
                         description: string.Format("WMI Query Win32_PerfFormattedData_PerfOS_PagingFile On Computer {0} ", settings.Host),
                         getData: () => Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
@@ -166,6 +171,7 @@ namespace NSysmon.Core.WMI
             {
                 return _perfOSSystem ?? (_perfOSSystem = new PollNodeDataCode<PerfOSSystem>()
                 {
+                    CacheTrendForSeconds = 60 * 5, // 5 minutes
                     UpdateCachedData = UpdateCachedData(
                         description: string.Format("WMI Query Win32_PerfFormattedData_PerfOS_System On Computer {0} ", settings.Host),
                         getData: () => Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
@@ -262,7 +268,7 @@ namespace NSysmon.Core.WMI
             {
                 return _pingPoller ?? (_pingPoller = new PollNodeDataCode<System.Net.NetworkInformation.PingReply>()
                 {
-                    //CacheForSeconds = 10,
+                    CacheTrendForSeconds = 60 * 5, // 5 minutes
                     UpdateCachedData = UpdateCachedData(
                         description: string.Format("Ping host {0} ", settings.Host),
                         getData: () =>
