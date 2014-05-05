@@ -12,6 +12,12 @@ namespace NSysmon.Core
     /// </remarks>
     public static class IMonitorStatusExtensionMethods
     {
+        public static string GetReasonSummary(this IEnumerable<IMonitorStatus> items)
+        {
+            var issues = items.WithIssues();
+            return issues.Any() ? string.Join(", ", issues.Select(i => i.MonitorStatusReason)) : null;
+        }
+
         public static MonitorStatus GetWorstStatus(this IEnumerable<IMonitorStatus> ims, string cacheKey = null, int durationSeconds = 5)
         {
             MonitorStatus? result = null;

@@ -22,8 +22,8 @@ namespace NSysmon.Core
         public string SourceFilePath { get; protected set; }
         public int SourceLineNumber { get; protected set; }
         protected PollNodeDataCache([CallerMemberName] string memberName = "",
-                             [CallerFilePath] string sourceFilePath = "",
-                             [CallerLineNumber] int sourceLineNumber = 0)
+                                    [CallerFilePath] string sourceFilePath = "",
+                                    [CallerLineNumber] int sourceLineNumber = 0)
         {
             UniqueId = Guid.NewGuid();
             ParentMemberName = memberName;
@@ -92,8 +92,15 @@ namespace NSysmon.Core
     /// This code is derived from https://github.com/opserver/Opserver/tree/a170ea8bcda9f9e52d4aaff7339f3d198309369b
     /// under "The MIT License (MIT)". Copyright (c) 2013 Stack Exchange Inc.
     /// </remarks>
-    public class PollNodeDataCode<T> : PollNodeDataCache where T : class
+    public class PollNodeDataCache<T> : PollNodeDataCache where T : class
     {
+        public PollNodeDataCache([CallerMemberName] string memberName = "",
+                                 [CallerFilePath] string sourceFilePath = "",
+                                 [CallerLineNumber] int sourceLineNumber = 0)
+            :base(memberName, sourceFilePath, sourceLineNumber)
+        {
+        }
+
         public override bool ContainsCachedData { get { return cachedData != null; } }
         public override object CachedData { get { return cachedData; } }
         public override Type Type { get { return typeof(T); } }
@@ -125,7 +132,7 @@ namespace NSysmon.Core
         /// <summary>
         /// Action to call to update the cached data during a Poll loop.
         /// </summary>
-        public Action<PollNodeDataCode<T>> UpdateCachedData { get; set; }
+        public Action<PollNodeDataCache<T>> UpdateCachedData { get; set; }
 
         public override int Poll(bool force = false)
         {

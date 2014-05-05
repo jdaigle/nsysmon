@@ -7,6 +7,7 @@ using System.Web.Http;
 using System.Web.Http.SelfHost;
 using System.Threading.Tasks;
 using NSysmon.Core.WMI;
+using NSysmon.Core.SqlServer;
 
 namespace NSysmon.Core
 {

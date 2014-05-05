@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Dapper">
+      <HintPath>..\packages\Dapper.1.13\lib\net45\Dapper.dll</HintPath>
+    </Reference>
     <Reference Include="log4net">
       <HintPath>..\external-bin\log4net.dll</HintPath>
     </Reference>
@@ -66,6 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Api\StatusController.cs" />
+    <Compile Include="EnumExtensions.cs" />
     <Compile Include="PingResult.cs" />
     <Compile Include="PollNodeDataCache.cs" />
     <Compile Include="DateTimeExtensions.cs" />
@@ -77,6 +81,23 @@
     <Compile Include="PollStatus.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqlServer\Enums.cs" />
+    <Compile Include="SqlServer\ISQLVersionedObject.cs" />
+    <Compile Include="SqlServer\PerfCounterRecord.cs" />
+    <Compile Include="SqlServer\SqlConfigurationOption.cs" />
+    <Compile Include="SqlServer\SqlCPUEvent.cs" />
+    <Compile Include="SqlServer\SqlDatabaseBackupInfo.cs" />
+    <Compile Include="SqlServer\SqlDatabaseFileInfo.cs" />
+    <Compile Include="SqlServer\SqlDatabaseInfo.cs" />
+    <Compile Include="SqlServer\SqlDatabaseVLFInfo.cs" />
+    <Compile Include="SqlServer\SqlJobInfo.cs" />
+    <Compile Include="SqlServer\SqlMemoryClerkSummaryInfo.cs" />
+    <Compile Include="SqlServer\SqlServerInstance.cs" />
+    <Compile Include="SqlServer\SqlServerInstanceSettings.cs" />
+    <Compile Include="SqlServer\SqlServerWindowsInfo.cs" />
+    <Compile Include="SqlServer\SqlServerProperties.cs" />
+    <Compile Include="SqlServer\SqlServerVersions.cs" />
+    <Compile Include="SqlServer\TraceFlagInfo.cs" />
     <Compile Include="WMI\Instrumentation.cs" />
     <Compile Include="WMI\PerfDiskPhysicalDisk.cs" />
     <Compile Include="WMI\TcpipNetworkInterface.cs" />

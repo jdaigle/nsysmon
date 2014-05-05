@@ -154,7 +154,7 @@ namespace NSysmon.Core
         /// <param name="logExceptions">Whether to log any exceptions to the log</param>
         /// <returns>A cache update action, used when creating a <see cref="Cache"/>.</returns>
         /// <param name="addExceptionData">Optionally add exception data, e.g. <code>e => e.AddLoggedData("Server", Name)</code></param>
-        protected Action<PollNodeDataCode<T>> UpdateCachedData<T>(string description,
+        protected Action<PollNodeDataCache<T>> UpdateCachedData<T>(string description,
                                                             Func<T> getData,
                                                             bool logExceptions = false,
                                                             Action<Exception> addExceptionData = null) where T : class

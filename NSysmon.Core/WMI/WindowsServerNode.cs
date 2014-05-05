@@ -11,7 +11,7 @@ namespace NSysmon.Core.WMI
         private static log4net.ILog Logger = log4net.LogManager.GetLogger(typeof(WindowsServerNode));
 
         public override string NodeType { get { return "Windows Server"; } }
-        public override int MinSecondsBetweenPolls { get { return 5; } }
+        public override int MinSecondsBetweenPolls { get { return 2; } }
 
         private readonly WindowsServerNodeSettings settings;
         public string NodeName { get; private set; }
@@ -49,12 +49,12 @@ namespace NSysmon.Core.WMI
             return null;
         }
 
-        private PollNodeDataCode<List<PerfOSProcessor>> _perfOSProcessor;
-        public PollNodeDataCode<List<PerfOSProcessor>> PerfOSProcessor
+        private PollNodeDataCache<List<PerfOSProcessor>> _perfOSProcessor;
+        public PollNodeDataCache<List<PerfOSProcessor>> PerfOSProcessor
         {
             get
             {
-                return _perfOSProcessor ?? (_perfOSProcessor = new PollNodeDataCode<List<PerfOSProcessor>>()
+                return _perfOSProcessor ?? (_perfOSProcessor = new PollNodeDataCache<List<PerfOSProcessor>>()
                 {
                     CacheTrendForSeconds = 60 * 5, // 5 minutes
                     UpdateCachedData = UpdateCachedData(
@@ -71,12 +71,12 @@ namespace NSysmon.Core.WMI
             }
         }
 
-        private PollNodeDataCode<PerfOSMemory> _perfOSMemory;
-        public PollNodeDataCode<PerfOSMemory> PerfOSMemory
+        private PollNodeDataCache<PerfOSMemory> _perfOSMemory;
+        public PollNodeDataCache<PerfOSMemory> PerfOSMemory
         {
             get
             {
-                return _perfOSMemory ?? (_perfOSMemory = new PollNodeDataCode<PerfOSMemory>()
+                return _perfOSMemory ?? (_perfOSMemory = new PollNodeDataCache<PerfOSMemory>()
                 {
                     CacheTrendForSeconds = 60 * 5, // 5 minutes
                     UpdateCachedData = UpdateCachedData(
@@ -93,12 +93,12 @@ namespace NSysmon.Core.WMI
             }
         }
 
-        private PollNodeDataCode<List<PerfDiskPhysicalDisk>> _perfDiskPhysicalDisk;
-        public PollNodeDataCode<List<PerfDiskPhysicalDisk>> PerfDiskPhysicalDisks
+        private PollNodeDataCache<List<PerfDiskPhysicalDisk>> _perfDiskPhysicalDisk;
+        public PollNodeDataCache<List<PerfDiskPhysicalDisk>> PerfDiskPhysicalDisks
         {
             get
             {
-                return _perfDiskPhysicalDisk ?? (_perfDiskPhysicalDisk = new PollNodeDataCode<List<PerfDiskPhysicalDisk>>()
+                return _perfDiskPhysicalDisk ?? (_perfDiskPhysicalDisk = new PollNodeDataCache<List<PerfDiskPhysicalDisk>>()
                 {
                     CacheTrendForSeconds = 60 * 5, // 5 minutes
                     UpdateCachedData = UpdateCachedData(
@@ -118,12 +118,12 @@ namespace NSysmon.Core.WMI
             }
         }
 
-        private PollNodeDataCode<List<TcpipNetworkInterface>> _tcpipNetworkInterface;
-        public PollNodeDataCode<List<TcpipNetworkInterface>> TcpipNetworkInterfaces
+        private PollNodeDataCache<List<TcpipNetworkInterface>> _tcpipNetworkInterface;
+        public PollNodeDataCache<List<TcpipNetworkInterface>> TcpipNetworkInterfaces
         {
             get
             {
-                return _tcpipNetworkInterface ?? (_tcpipNetworkInterface = new PollNodeDataCode<List<TcpipNetworkInterface>>()
+                return _tcpipNetworkInterface ?? (_tcpipNetworkInterface = new PollNodeDataCache<List<TcpipNetworkInterface>>()
                 {
                     CacheTrendForSeconds = 60 * 5, // 5 minutes
                     UpdateCachedData = UpdateCachedData(
@@ -142,12 +142,12 @@ namespace NSysmon.Core.WMI
             }
         }
 
-        private PollNodeDataCode<List<PerfOSPagingFile>> _perfOSPagingFiles;
-        public PollNodeDataCode<List<PerfOSPagingFile>> PerfOSPagingFiles
+        private PollNodeDataCache<List<PerfOSPagingFile>> _perfOSPagingFiles;
+        public PollNodeDataCache<List<PerfOSPagingFile>> PerfOSPagingFiles
         {
             get
             {
-                return _perfOSPagingFiles ?? (_perfOSPagingFiles = new PollNodeDataCode<List<PerfOSPagingFile>>()
+                return _perfOSPagingFiles ?? (_perfOSPagingFiles = new PollNodeDataCache<List<PerfOSPagingFile>>()
                 {
                     CacheTrendForSeconds = 60 * 5, // 5 minutes
                     UpdateCachedData = UpdateCachedData(
@@ -164,12 +164,12 @@ namespace NSysmon.Core.WMI
             }
         }
 
-        private PollNodeDataCode<PerfOSSystem> _perfOSSystem;
-        public PollNodeDataCode<PerfOSSystem> PerfOSSystem
+        private PollNodeDataCache<PerfOSSystem> _perfOSSystem;
+        public PollNodeDataCache<PerfOSSystem> PerfOSSystem
         {
             get
             {
-                return _perfOSSystem ?? (_perfOSSystem = new PollNodeDataCode<PerfOSSystem>()
+                return _perfOSSystem ?? (_perfOSSystem = new PollNodeDataCache<PerfOSSystem>()
                 {
                     CacheTrendForSeconds = 60 * 5, // 5 minutes
                     UpdateCachedData = UpdateCachedData(
@@ -186,12 +186,12 @@ namespace NSysmon.Core.WMI
             }
         }
 
-        private PollNodeDataCode<List<Win32Volume>> _win32Volumes;
-        public PollNodeDataCode<List<Win32Volume>> Win32Volumes
+        private PollNodeDataCache<List<Win32Volume>> _win32Volumes;
+        public PollNodeDataCache<List<Win32Volume>> Win32Volumes
         {
             get
             {
-                return _win32Volumes ?? (_win32Volumes = new PollNodeDataCode<List<Win32Volume>>()
+                return _win32Volumes ?? (_win32Volumes = new PollNodeDataCache<List<Win32Volume>>()
                 {
                     CacheForSeconds = 60 * 15, // 15 minutes
                     UpdateCachedData = UpdateCachedData(
@@ -213,12 +213,12 @@ namespace NSysmon.Core.WMI
             }
         }
 
-        private PollNodeDataCode<Win32ComputerSystem> _win32ComputerSystem;
-        public PollNodeDataCode<Win32ComputerSystem> Win32ComputerSystem
+        private PollNodeDataCache<Win32ComputerSystem> _win32ComputerSystem;
+        public PollNodeDataCache<Win32ComputerSystem> Win32ComputerSystem
         {
             get
             {
-                return _win32ComputerSystem ?? (_win32ComputerSystem = new PollNodeDataCode<Win32ComputerSystem>()
+                return _win32ComputerSystem ?? (_win32ComputerSystem = new PollNodeDataCache<Win32ComputerSystem>()
                 {
                     CacheForSeconds = 60 * 60, // 1 hour
                     UpdateCachedData = UpdateCachedData(
@@ -260,13 +260,13 @@ namespace NSysmon.Core.WMI
             }
         }
 
-        private PollNodeDataCode<PingResult> _pingPoller;
+        private PollNodeDataCache<PingResult> _pingPoller;
         private System.Net.NetworkInformation.Ping pinger = new System.Net.NetworkInformation.Ping();
-        public PollNodeDataCode<PingResult> PingPoller
+        public PollNodeDataCache<PingResult> PingPoller
         {
             get
             {
-                return _pingPoller ?? (_pingPoller = new PollNodeDataCode<PingResult>()
+                return _pingPoller ?? (_pingPoller = new PollNodeDataCache<PingResult>()
                 {
                     CacheTrendForSeconds = 60 * 5, // 5 minutes
                     UpdateCachedData = UpdateCachedData(

@@ -23,5 +23,14 @@ namespace NSysmon.Core
             // TODO:
             //ErrorStore.LogExceptionWithoutContext(ex, appendFullStackTrace: true);
         }
+
+        /// <summary>
+        /// Adds a key/value pair for logging to an exception, one that'll appear in exceptional
+        /// </summary>
+        public static T AddLoggedData<T>(this T ex, string key, string value) where T : Exception
+        {
+            ex.Data["ErrorLog-" + key] = value;
+            return ex;
+        }
     }
 }
