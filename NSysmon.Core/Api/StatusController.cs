@@ -18,6 +18,15 @@ namespace NSysmon.Core.Api
 {
     public class StatusController : ApiController
     {
+        [Route("api/test")]
+        public IndexViewModel GetTest()
+        {
+            return new IndexViewModel
+            {
+                Now = DateTime.Now
+            };
+        }
+
         [Route("api/status")]
         public object GetStatus()
         {

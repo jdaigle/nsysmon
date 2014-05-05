@@ -42,6 +42,9 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="RazorEngine">
+      <HintPath>..\packages\RazorEngine.3.4.1\lib\net45\RazorEngine.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -61,6 +64,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.WebApi.SelfHost.5.1.2\lib\net45\System.Web.Http.SelfHost.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.0.0\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -68,6 +75,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Api\IndexViewModel.cs" />
+    <Compile Include="Api\RazorFormatter.cs" />
+    <Compile Include="Api\RazorViewModelBase.cs" />
     <Compile Include="Api\StatusController.cs" />
     <Compile Include="EnumExtensions.cs" />
     <Compile Include="PingResult.cs" />
@@ -113,6 +123,7 @@
     <Compile Include="WMI\WindowsServerNodeSettings.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Api\Index.cshtml" />
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>

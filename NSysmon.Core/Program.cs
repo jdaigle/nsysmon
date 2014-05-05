@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
+using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.SelfHost;
-using System.Threading.Tasks;
+using NSysmon.Core.Api;
 using NSysmon.Core.WMI;
-using NSysmon.Core.SqlServer;
 
 namespace NSysmon.Core
 {
@@ -24,11 +21,13 @@ namespace NSysmon.Core
             var config = new HttpSelfHostConfiguration("http://localhost:8080");
             // Remove the XML formatter
             config.Formatters.Remove(config.Formatters.XmlFormatter);
+            config.Formatters.Add(new RazorFormatter());
             config.Formatters.JsonFormatter.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
             config.Formatters.JsonFormatter.SerializerSettings.Error += (x, y) =>
             {
                 return;
             };
+            config.Formatters.JsonFormatter.MediaTypeMappings.Add(new QueryStringMapping("type", "json", new MediaTypeHeaderValue("application/json")));
             // Attribute routing.
             config.MapHttpAttributeRoutes();
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
@@ -38,11 +37,6 @@ namespace NSysmon.Core
                 server.OpenAsync().Wait();
                 Console.WriteLine("Press Enter to quit.");
                 Console.ReadLine();
-            }
-
-            while (true)
-            {
-                Thread.Sleep(2000);
             }
         }
     }
