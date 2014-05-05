@@ -18,7 +18,7 @@ namespace NSysmon.Core.SqlServer
             get
             {
                 return !IsEnabled
-                           ? MonitorStatus.Unknown
+                           ? MonitorStatus.Warning
                            : IsRunning
                                  ? MonitorStatus.Good
                                  : LastRunMonitorStatus;
@@ -28,8 +28,14 @@ namespace NSysmon.Core.SqlServer
         {
             get
             {
-                if (!IsEnabled) return "Not enabled";
-                if (IsRunning || LastRunMonitorStatus == MonitorStatus.Good) return null;
+                if (!IsEnabled)
+                {
+                    return Name + " - Not enabled";
+                }
+                if (IsRunning || LastRunMonitorStatus == MonitorStatus.Good)
+                {
+                    return null;
+                }
                 return Name + " - Last run: " +
                        (LastRunStatus.HasValue ? LastRunStatus.Value.GetDescription() : "unknown");
             }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -9,6 +10,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Http;
 using System.Web.UI.DataVisualization.Charting;
 using System.Web.UI.WebControls;
@@ -18,50 +20,84 @@ namespace NSysmon.Core.Api
 {
     public class StatusController : ApiController
     {
-        [Route("api/test")]
-        public IndexViewModel GetTest()
+        [Route("api/nodes")]
+        public NodeListViewModel GetNodeList()
         {
-            return new IndexViewModel
+            return new NodeListViewModel
             {
-                Now = DateTime.Now
+                Nodes = PollingEngine.AllPollNodes
+                .OrderBy(x => x.NodeType)
+                .ThenBy(x => x.UniqueKey)
+                .Select(node => GetNodeStatusViewModel(node)).ToList(),
             };
         }
 
-        [Route("api/status")]
-        public object GetStatus()
+        [Route("api/node/{nodeType}/{nodeKey}/status")]
+        public NodeStatusViewModel GetNodeStatus(string nodeType, string nodeKey)
         {
-            return PollingEngine.AllPollNodes.Select(node => new
+            var node = PollingEngine.GetNode(HttpUtility.UrlDecode(nodeType), HttpUtility.UrlDecode(nodeKey));
+            return GetNodeStatusViewModel(node);
+        }
+
+        private static NodeStatusViewModel GetNodeStatusViewModel(PollNode node)
+        {
+            return new NodeStatusViewModel
             {
-                node.NodeType,
-                node.UniqueKey,
-                node.LastPoll,
-                node.LastPollDuration,
-                node.MinSecondsBetweenPolls,
-                node.MonitorStatus,
-                node.MonitorStatusReason,
-                node.PollTaskStatus,
-                DataCaches = node.DataCaches.Select(dataCache => new
+                NodeType = node.NodeType,
+                UniqueKey = node.UniqueKey,
+                LastPoll = node.LastPoll,
+                LastPollDuration = node.LastPollDuration,
+                MinSecondsBetweenPolls = node.MinSecondsBetweenPolls,
+                MonitorStatus = node.MonitorStatus,
+                MonitorStatusReason = node.MonitorStatusReason,
+                PollTaskStatus = node.PollTaskStatus,
+                PollerCount = node.DataCaches.Count(),
+                DataCaches = node.DataCaches.Select(dataCache => new NodeDataCacheViewModel
                 {
-                    dataCache.Type,
-                    dataCache.UniqueId,
-                    dataCache.LastPoll,
-                    dataCache.LastPollDuration,
-                    dataCache.LastPollStatus,
-                    dataCache.LastSuccess,
-                    dataCache.MonitorStatus,
-                    dataCache.MonitorStatusReason,
-                    dataCache.NextPoll,
-                    dataCache.PollsSuccessful,
-                    dataCache.PollsTotal,
-                    dataCache.CacheFailureForSeconds,
-                    dataCache.CacheForSeconds,
-                    CachedTrendData = dataCache.CachedTrendData.Select(d => new
-                    {
-                        DateTime = d.Item1,
-                        Data = d.Item2,
-                    }).ToList(),
+                    Name = dataCache.ParentMemberName,
+                    Type = dataCache.Type,
+                    UniqueId = dataCache.UniqueId,
+                    LastPoll = dataCache.LastPoll,
+                    LastPollDuration = dataCache.LastPollDuration,
+                    LastPollStatus = dataCache.LastPollStatus,
+                    LastSuccess = dataCache.LastSuccess,
+                    MonitorStatus = dataCache.GetCachedDataMonitorStatus(),
+                    MonitorStatusReason = dataCache.GetCachedDataMonitorStatusReason(),
+                    NextPoll = dataCache.NextPoll,
+                    PollsSuccessful = dataCache.PollsSuccessful,
+                    PollsTotal = dataCache.PollsTotal,
+                    CacheFailureForSeconds = dataCache.CacheFailureForSeconds,
+                    CacheForSecond = dataCache.CacheForSeconds,
+                    CachedDataCount = dataCache.ContainsCachedData ? (dataCache.CachedData is IList ? ((IList)dataCache.CachedData).Count : dataCache.CachedData != null ? 1 : 0) : 0,
+                    CachedData = ToCachedDataDictionary(dataCache.ContainsCachedData, dataCache.CachedData),
+                    //CachedTrendData = dataCache.CachedTrendData.Select(d => new
+                    //{
+                    //    DateTime = d.Item1,
+                    //    Data = d.Item2,
+                    //}).ToList(),
                 }).ToList(),
-            }).ToList();
+            };
+        }
+
+        private static List<IDictionary<string, object>> ToCachedDataDictionary(bool containsCachedData, object cachedData)
+        {
+            var dictionary = new List<IDictionary<string, object>>();
+            if (!containsCachedData || cachedData == null)
+            {
+                return dictionary;
+            }
+            if (cachedData is IList)
+            {
+                foreach (var item in ((IList)cachedData))
+                {
+                    dictionary.Add(item.ToExpando());
+                }
+            }
+            else
+            {
+                dictionary.Add(cachedData.ToExpando());
+            }
+            return dictionary;
         }
 
         [Route("api/graphs")]

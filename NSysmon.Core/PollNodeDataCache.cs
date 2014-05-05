@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -86,6 +87,9 @@ namespace NSysmon.Core
         public virtual Type Type { get { return typeof(PollNodeDataCache); } }
 
         public abstract int Poll(bool force = false);
+
+        public abstract MonitorStatus GetCachedDataMonitorStatus();
+        public abstract string GetCachedDataMonitorStatusReason();
     }
 
     /// <remarks>
@@ -97,7 +101,7 @@ namespace NSysmon.Core
         public PollNodeDataCache([CallerMemberName] string memberName = "",
                                  [CallerFilePath] string sourceFilePath = "",
                                  [CallerLineNumber] int sourceLineNumber = 0)
-            :base(memberName, sourceFilePath, sourceLineNumber)
+            : base(memberName, sourceFilePath, sourceLineNumber)
         {
         }
 
@@ -127,6 +131,32 @@ namespace NSysmon.Core
         public override IEnumerable<Tuple<DateTime, object>> CachedTrendData
         {
             get { return cachedTrendData.Select(x => new Tuple<DateTime, object>(x.Item1, x.Item2)); }
+        }
+
+        public override MonitorStatus GetCachedDataMonitorStatus()
+        {
+            if (cachedData is IMonitorStatus)
+            {
+                return ((IMonitorStatus)cachedData).MonitorStatus;
+            }
+            if (cachedData is IList)
+            {
+                return ((IList)cachedData).Cast<object>().OfType<IMonitorStatus>().GetWorstStatus();
+            }
+            return MonitorStatus.Good;
+        }
+
+        public override string GetCachedDataMonitorStatusReason()
+        {
+            if (cachedData is IMonitorStatus)
+            {
+                return ((IMonitorStatus)cachedData).MonitorStatusReason;
+            }
+            if (cachedData is IList)
+            {
+                return ((IList)cachedData).Cast<object>().OfType<IMonitorStatus>().GetReasonSummary();
+            }
+            return string.Empty;
         }
 
         /// <summary>

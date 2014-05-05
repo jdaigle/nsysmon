@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace NSysmon.Core.Api
 {
-    public class IndexViewModel : RazorViewModelBase
+    public class NodeListViewModel : RazorViewModelBase
     {
-        public DateTime Now { get; set; }
+        public List<NodeStatusViewModel> Nodes { get; set; }
     }
 }

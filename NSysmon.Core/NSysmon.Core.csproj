@@ -75,11 +75,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Api\IndexViewModel.cs" />
+    <Compile Include="Api\NodeListViewModel.cs" />
+    <Compile Include="Api\NodeStatusViewModel.cs" />
     <Compile Include="Api\RazorFormatter.cs" />
     <Compile Include="Api\RazorViewModelBase.cs" />
     <Compile Include="Api\StatusController.cs" />
     <Compile Include="EnumExtensions.cs" />
+    <Compile Include="ObjectExtensions.cs" />
     <Compile Include="PingResult.cs" />
     <Compile Include="PollNodeDataCache.cs" />
     <Compile Include="DateTimeExtensions.cs" />
@@ -123,9 +125,12 @@
     <Compile Include="WMI\WindowsServerNodeSettings.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Api\Index.cshtml" />
+    <EmbeddedResource Include="Api\NodeList.cshtml" />
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Api\NodeStatus.cshtml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
