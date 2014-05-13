@@ -6,13 +6,22 @@ using System.Threading;
 using System.Web.Http;
 using System.Web.Http.SelfHost;
 using NSysmon.Core.Api;
+using NSysmon.Core.Syslog;
 namespace NSysmon.Core
 {
     public class ServiceHost
     {
         public class JSONConfig
         {
+            public JSONConfig()
+            {
+                nodes = new JSONConfigNode[0];
+                syslogListenerEnabled = true;
+            }
+
             public JSONConfigNode[] nodes { get; set; }
+            public bool syslogListenerEnabled { get; set; }
+            public int syslogListenerPort { get; set; }
         }
 
         public class JSONConfigNode
@@ -43,6 +52,13 @@ namespace NSysmon.Core
                 PollingEngine.TryAdd(pollNode);
             }
             PollingEngine.StartPolling();
+
+            if (nodeConfig.syslogListenerEnabled)
+            {
+                var listener = new SyslogListener();
+                Action<int> startListener = listener.Start;
+                startListener.BeginInvoke(514, null, null);
+            }
 
             var hostConfig = new HttpSelfHostConfiguration("http://localhost:8080");
             // Remove the XML formatter

@@ -114,6 +114,7 @@
     <Compile Include="SqlServer\SqlServerProperties.cs" />
     <Compile Include="SqlServer\SqlServerVersions.cs" />
     <Compile Include="SqlServer\TraceFlagInfo.cs" />
+    <Compile Include="Syslog\SyslogListener.cs" />
     <Compile Include="WMI\Instrumentation.cs" />
     <Compile Include="WMI\PerfDiskPhysicalDisk.cs" />
     <Compile Include="WMI\TcpipNetworkInterface.cs" />

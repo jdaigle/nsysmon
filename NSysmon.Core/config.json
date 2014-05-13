@@ -21,5 +21,6 @@
                 "ConnectionString": "server=localhost;database=master;trusted_connection=true;"
             }
         }
-    ]
+    ],
+    "syslogListenerEnabled": true
 }
