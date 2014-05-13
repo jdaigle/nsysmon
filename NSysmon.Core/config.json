@@ -1,0 +1,25 @@
+﻿{
+    "nodes": [
+        {
+            "type": "NSysmon.Core.WMI.WindowsServerNode",
+            "name": "localhost",
+            "settings": {
+                "$type": "NSysmon.Core.WMI.WindowsServerNodeSettings, NSysmon.Core",
+                "Host": "127.0.0.1",
+                "WMIPollingSettings": {
+                    "QueryTimeout": 30000,
+                    "AuthUser": "username",
+                    "AuthPassword": "password"
+                }
+            }
+        },
+        {
+            "type": "NSysmon.Core.SqlServer.SqlServerInstance",
+            "name": "localhost",
+            "settings": {
+                "$type": "NSysmon.Core.SqlServer.SqlServerInstanceSettings, NSysmon.Core",
+                "ConnectionString": "server=localhost;database=master;trusted_connection=true;"
+            }
+        }
+    ]
+}
