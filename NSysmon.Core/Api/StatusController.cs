@@ -111,11 +111,11 @@ namespace NSysmon.Core.Api
             var avgCPU = GetSparkSeries("Avg Load");
             chart.Series.Add(avgCPU);
 
-            foreach (var mp in node.PerfOSProcessor.TrendData)
-            {
-                var totalCpu = mp.Item2.Single(x => x.Name == "Total");
-                avgCPU.Points.Add(new DataPoint(mp.Item1.ToOADate(), totalCpu.Utilization));
-            }
+            //foreach (var mp in node.PerfOSProcessor.TrendData)
+            //{
+            //    var totalCpu = mp.Item2.Single(x => x.Name == "Total");
+            //    avgCPU.Points.Add(new DataPoint(mp.Item1.ToOADate(), totalCpu.Utilization));
+            //}
 
             //foreach (var mp in node.PerfOSMemory.TrendData)
             //{

@@ -36,7 +36,6 @@ namespace NSysmon.Core
 
         public int? CacheFailureForSeconds { get; set; }
         public int CacheForSeconds { get; set; }
-        public int CacheTrendForSeconds { get; set; }
 
         protected long _pollsTotal;
         protected long _pollsSuccessful;
@@ -83,7 +82,6 @@ namespace NSysmon.Core
 
         public abstract bool ContainsCachedData { get; }
         public abstract object CachedData { get; }
-        public abstract IEnumerable<Tuple<DateTime, object>> CachedTrendData { get; }
         public virtual Type Type { get { return typeof(PollNodeDataCache); } }
 
         public abstract int Poll(bool force = false);
@@ -121,16 +119,6 @@ namespace NSysmon.Core
                 return cachedData;
             }
             internal set { cachedData = value; }
-        }
-
-        private List<Tuple<DateTime, T>> cachedTrendData = new List<Tuple<DateTime, T>>();
-        public IReadOnlyList<Tuple<DateTime, T>> TrendData
-        {
-            get { return cachedTrendData.AsReadOnly(); }
-        }
-        public override IEnumerable<Tuple<DateTime, object>> CachedTrendData
-        {
-            get { return cachedTrendData.Select(x => new Tuple<DateTime, object>(x.Item1, x.Item2)); }
         }
 
         public override MonitorStatus GetCachedDataMonitorStatus()
@@ -194,13 +182,6 @@ namespace NSysmon.Core
                 if (cachedData != null)
                 {
                     Interlocked.Increment(ref _pollsSuccessful);
-                    if (LastSuccess.HasValue)
-                    {
-                        this.cachedTrendData.Add(new Tuple<DateTime, T>(LastSuccess.Value, cachedData));
-                        var cacheTrendForSeconds = Math.Max(CacheForSeconds, CacheTrendForSeconds);
-                        var minCacheDate = DateTime.UtcNow.AddSeconds((cacheTrendForSeconds * -1));
-                        this.cachedTrendData.RemoveAll(x => x.Item1 < minCacheDate);
-                    }
                 }
                 return cachedData != null ? 1 : 0;
             }
