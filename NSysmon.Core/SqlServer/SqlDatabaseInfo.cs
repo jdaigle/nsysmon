@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 /// <remarks>
 /// This code is derived from https://github.com/opserver/Opserver/tree/a170ea8bcda9f9e52d4aaff7339f3d198309369b
@@ -12,6 +13,7 @@ namespace NSysmon.Core.SqlServer
 {
     public class SqlDatabaseInfo : ISQLVersionedObject, IMonitorStatus
     {
+        [JsonIgnore]
         public Version MinVersion { get { return SqlServerVersions.SQL2005.RTM; } }
 
         public string OverallStateDescription

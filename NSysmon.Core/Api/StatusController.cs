@@ -21,25 +21,25 @@ namespace NSysmon.Core.Api
     public class StatusController : ApiController
     {
         [Route("api/nodes")]
-        public NodeListViewModel GetNodeList()
+        public NodeListViewModel GetNodeList(bool? includeData = false)
         {
             return new NodeListViewModel
             {
                 Nodes = PollingEngine.AllPollNodes
                 .OrderBy(x => x.NodeType)
                 .ThenBy(x => x.UniqueKey)
-                .Select(node => GetNodeStatusViewModel(node)).ToList(),
+                .Select(node => GetNodeStatusViewModel(node, includeData)).ToList(),
             };
         }
 
         [Route("api/node/{nodeType}/{nodeKey}/status")]
-        public NodeStatusViewModel GetNodeStatus(string nodeType, string nodeKey)
+        public NodeStatusViewModel GetNodeStatus(string nodeType, string nodeKey, bool? includeData = false)
         {
             var node = PollingEngine.GetNode(HttpUtility.UrlDecode(nodeType), HttpUtility.UrlDecode(nodeKey));
-            return GetNodeStatusViewModel(node);
+            return GetNodeStatusViewModel(node, includeData);
         }
 
-        private static NodeStatusViewModel GetNodeStatusViewModel(PollNode node)
+        private static NodeStatusViewModel GetNodeStatusViewModel(PollNode node, bool? includeData = false)
         {
             return new NodeStatusViewModel
             {
@@ -69,7 +69,7 @@ namespace NSysmon.Core.Api
                     CacheFailureForSeconds = dataCache.CacheFailureForSeconds,
                     CacheForSecond = dataCache.CacheForSeconds,
                     CachedDataCount = dataCache.ContainsCachedData ? (dataCache.CachedData is IList ? ((IList)dataCache.CachedData).Count : dataCache.CachedData != null ? 1 : 0) : 0,
-                    CachedData = ToCachedDataDictionary(dataCache.ContainsCachedData, dataCache.CachedData),
+                    CachedData = includeData == true ? ToObjectArray(dataCache.ContainsCachedData, dataCache.CachedData) : new object[0],
                     //CachedTrendData = dataCache.CachedTrendData.Select(d => new
                     //{
                     //    DateTime = d.Item1,
@@ -79,25 +79,25 @@ namespace NSysmon.Core.Api
             };
         }
 
-        private static List<IDictionary<string, object>> ToCachedDataDictionary(bool containsCachedData, object cachedData)
+        private static object[] ToObjectArray(bool containsCachedData, object cachedData)
         {
-            var dictionary = new List<IDictionary<string, object>>();
+            var objects = new List<object>();
             if (!containsCachedData || cachedData == null)
             {
-                return dictionary;
+                return objects.ToArray();
             }
             if (cachedData is IList)
             {
                 foreach (var item in ((IList)cachedData))
                 {
-                    dictionary.Add(item.ToExpando());
+                    objects.Add(item);
                 }
             }
             else
             {
-                dictionary.Add(cachedData.ToExpando());
+                objects.Add(cachedData);
             }
-            return dictionary;
+            return objects.ToArray();
         }
 
         [Route("api/graphs")]

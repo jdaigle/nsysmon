@@ -38,6 +38,6 @@ namespace NSysmon.Core.Api
         public int? CacheFailureForSeconds { get; set; }
         public int CacheForSecond { get; set; }
         public int CachedDataCount { get; set; }
-        public List<IDictionary<string, object>> CachedData { get; set; }
+        public object[] CachedData { get; set; }
     }
 }

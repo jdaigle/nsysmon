@@ -22,6 +22,7 @@ namespace NSysmon.Core
             // Remove the XML formatter
             config.Formatters.Remove(config.Formatters.XmlFormatter);
             config.Formatters.Add(new RazorFormatter());
+            config.Formatters.JsonFormatter.SerializerSettings.TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Auto;
             config.Formatters.JsonFormatter.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
             config.Formatters.JsonFormatter.SerializerSettings.Error += (x, y) =>
             {

@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace NSysmon.Core.SqlServer
 {
     public class SqlDatabaseFileInfo : ISQLVersionedObject
     {
+        [JsonIgnore]
         public Version MinVersion { get { return SqlServerVersions.SQL2008R2.RTM; } }
 
         public string DatabaseName { get; private set; }
