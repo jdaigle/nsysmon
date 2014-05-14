@@ -33,6 +33,17 @@ The design is still in the very early prototype phase. Some of our ideas include
   produce trend graphs.
 * API to expose the data to front-end dashboard and admin control panels.
 
+## Windows WMI Security
+
+* The User must be a member of the following builtin groups:
+ * Distributed COM Users
+ * Event Log Readers
+ * Performance Log Users
+ * Performance Monitor Users
+* The User must also be granted "Remote Enable" permissions
+  on the WMI Control (apply to \\root\CIMV2).
+  See: http://msdn.microsoft.com/en-us/library/aa393266.aspx
+
 ## SQL Server Security
 
 The NSysmon login needs the following roles and permissions on each SQL Server:

@@ -80,7 +80,7 @@ namespace NSysmon.Core.WMI
                     {
                         Authentication = AuthenticationLevel.Packet,
                         Timeout = new TimeSpan(0, 0, 30),
-                        EnablePrivileges = true
+                        EnablePrivileges = true,
                     };
                     break;
             }

@@ -123,6 +123,7 @@
     <Compile Include="WMI\PerfOSMemory.cs" />
     <Compile Include="WMI\PerfOSProcessor.cs" />
     <Compile Include="WMI\QueryResult.cs" />
+    <Compile Include="WMI\Win32NetworkAdapter.cs" />
     <Compile Include="WMI\Win32Volume.cs" />
     <Compile Include="WMI\WMIPollingSettings.cs" />
     <Compile Include="WMI\Win32ComputerSystem.cs" />

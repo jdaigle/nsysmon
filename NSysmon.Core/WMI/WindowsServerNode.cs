@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,6 +30,7 @@ namespace NSysmon.Core.WMI
             {
                 yield return Win32ComputerSystem;
                 yield return Win32Volumes;
+                yield return Win32NetworkAdapters;
                 yield return PingPoller;
                 yield return PerfOSProcessor;
                 yield return PerfOSMemory;
@@ -251,6 +253,39 @@ namespace NSysmon.Core.WMI
                                     OSBuildNumber = Win32_OperatingSystem.Data.Single().BuildNumber,
                                 };
                             }
+                        ),
+                });
+            }
+        }
+
+        private PollNodeDataCache<List<Win32NetworkAdapter>> _win32NetworkAdapters;
+        public PollNodeDataCache<List<Win32NetworkAdapter>> Win32NetworkAdapters
+        {
+            get
+            {
+                return _win32NetworkAdapters ?? (_win32NetworkAdapters = new PollNodeDataCache<List<Win32NetworkAdapter>>()
+                {
+                    CacheForSeconds = 60 * 60, // 1 hour
+                    UpdateCachedData = UpdateCachedData(
+                        description: string.Format("WMI Query Win32_NetworkAdapter On Computer {0} ", settings.Host),
+                        getData: () => Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
+                            "select Name, Description, AdapterType, AdapterTypeId, MACAddress, NetConnectionID, NetConnectionStatus, NetEnabled, physicaladapter, ProductName, Manufacturer, TimeOfLastReset from Win32_NetworkAdapter",
+                            results => results.Select(mo => new Win32NetworkAdapter()
+                            {
+                                Name = (mo["Name"] ?? string.Empty).ToString(),
+                                Description = (mo["Description"] ?? string.Empty).ToString(),
+                                AdapterType = (mo["AdapterType"] ?? string.Empty).ToString(),
+                                AdapterTypeId = (UInt16)(mo["AdapterTypeId"] ?? (UInt16)0),
+                                MACAddress = (mo["MACAddress"] ?? string.Empty).ToString(),
+                                NetConnectionID = (mo["NetConnectionID"] ?? string.Empty).ToString(),
+                                NetConnectionStatus = (UInt16)(mo["NetConnectionStatus"] ?? (UInt16)0),
+                                NetEnabled = (bool)(mo["NetEnabled"] ?? false),
+                                PhysicalAdapter = (bool)mo["PhysicalAdapter"],
+                                ProductName = (mo["ProductName"] ?? string.Empty).ToString(),
+                                Manufacturer = (mo["Manufacturer"] ?? string.Empty).ToString(),
+                                //TimeOfLastReset = (DateTime)(mo["TimeOfLastReset"] ?? DateTime.MinValue),"20130923153336.095997-240"
+                                TimeOfLastReset = DateTime.ParseExact(mo["TimeOfLastReset"].ToString(), "yyyyMMddHHmmss.ffffff-240", DateTimeFormatInfo.InvariantInfo),
+                            })).Data.ToList()
                         ),
                 });
             }
