@@ -49,11 +49,12 @@ The design is still in the very early prototype phase. Some of our ideas include
 The NSysmon login needs the following roles and permissions on each SQL Server:
 
     use [master];
+    CREATE LOGIN <USER OR role> FROM WINDOWS WITH DEFAULT_DATABASE=[master]
     GRANT VIEW ANY DATABASE TO <USER OR role>;
     GRANT VIEW ANY DEFINITION TO <USER OR role>;
     GRANT VIEW SERVER STATE TO <USER OR role>;
     USE [msdb];
-    CREATE USER [nsysmonagent] FOR LOGIN <USER OR role>;
+    CREATE USER <USER OR role> FOR LOGIN <USER OR role>;
     EXEC sp_addrolemember N'db_datareader', N'<USER OR role>';
     EXEC sp_addrolemember N'SQLAgentOperatorRole', N'<USER OR role>';
     EXEC sp_addrolemember N'SQLAgentUserRole', N'<USER OR role>';
