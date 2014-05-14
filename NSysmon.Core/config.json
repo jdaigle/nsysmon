@@ -22,5 +22,10 @@
             }
         }
     ],
-    "syslogListenerEnabled": true
+    "syslog": {
+        "listenerEnabled": true
+    },
+    "http": {
+        "listenerPort": 8080
+    }
 }
