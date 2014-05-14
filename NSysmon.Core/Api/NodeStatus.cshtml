@@ -14,7 +14,10 @@
         <span><a href="~/Api/node/@(HttpUtility.UrlEncode((string)node.NodeType))/@(HttpUtility.UrlEncode((string)node.UniqueKey))/status">@node.NodeType - @node.UniqueKey</a></span>
     </p>
     <h1>@node.NodeType - @node.UniqueKey</h1>
-    <h5><a href="~/Api/node/@(HttpUtility.UrlEncode((string)node.NodeType))/@(HttpUtility.UrlEncode((string)node.UniqueKey))/status?type=json">As JSON</a></h5>
+    <h5>
+        <a href="~/Api/node/@(HttpUtility.UrlEncode((string)node.NodeType))/@(HttpUtility.UrlEncode((string)node.UniqueKey))/status?type=json">As JSON</a>
+        | <a href="~/Api/node/@(HttpUtility.UrlEncode((string)node.NodeType))/@(HttpUtility.UrlEncode((string)node.UniqueKey))/status?type=json&includeData=true">As JSON w/ Data</a>
+    </h5>
     <ul>
         <li>Node Type: <strong>@node.NodeType</strong></li>
         <li>Unique Key: <strong>@node.UniqueKey</strong></li>
@@ -28,7 +31,8 @@
                 <th>Name</th>
                 <th>Polls</th>
                 <th>Monitor Status</th>
-                <th>Last Polld</th>
+                <th>Last Poll (duration)</th>
+                <th>Next Poll (cache duration)</th>
             </tr>
         </thead>
         <tbody>
@@ -39,7 +43,8 @@
                     <td>@data.Name</td>
                     <td>@data.CachedDataCount (@data.PollsTotal polls @data.PollsSuccessful successful)</td>
                     <td style="max-width: 300px;">@data.MonitorStatus.ToString() - @data.MonitorStatusReason</td>
-                    <td>@(((DateTime)data.LastPoll).ToRelativeTime()) (@data.LastPollDuration.TotalMilliseconds ms)</td>
+                    <td title="@(((DateTime)data.LastPoll).ToString())">@(((DateTime)data.LastPoll).ToRelativeTime()) (@data.LastPollDuration.TotalMilliseconds ms)</td>
+                    <td title="@(((DateTime)data.NextPoll).ToString())">@(((DateTime)data.NextPoll).ToRelativeTime()) (@data.CacheForSecond s)</td>
                 </tr>
             }
         </tbody>

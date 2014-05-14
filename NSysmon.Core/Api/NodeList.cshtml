@@ -10,7 +10,10 @@
         <span><a href="~/api/nodes">Nodes</a></span>
     </p>
     <h1>Nodes</h1>
-    <h5><a href="~/api/nodes?type=json">As JSON</a></h5>
+    <h5>
+        <a href="~/api/nodes?type=json">As JSON</a>
+        | <a href="~/api/nodes?type=json&includeData=true">As JSON w/ Data</a>
+    </h5>
     <table>
         <thead>
             <tr>
@@ -32,7 +35,7 @@
                     </td>
                     <td>@node.MonitorStatus.ToString() - @node.MonitorStatusReason</td>
                     <td>@node.PollerCount</td>
-                    <td>@(((DateTime?)node.LastPoll).ToRelativeTime()) (@node.LastPollDuration.TotalMilliseconds ms)</td>
+                    <td title="@(((DateTime?)node.LastPoll).ToRelativeTime())">@(((DateTime?)node.LastPoll).ToRelativeTime()) (@node.LastPollDuration.TotalMilliseconds ms)</td>
                     <td>@node.PollTaskStatus</td>
                 </tr>
             }
