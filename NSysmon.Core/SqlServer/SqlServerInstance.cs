@@ -17,7 +17,7 @@ namespace NSysmon.Core.SqlServer
     public class SqlServerInstance : PollNode
     {
         public override string NodeType { get { return "Sql Server"; } }
-        public override int MinSecondsBetweenPolls { get { return 2; } }
+        public override int MinSecondsBetweenPolls { get { return 10; } }
 
         private readonly SqlServerInstanceSettings settings;
         public string Name { get; private set; }

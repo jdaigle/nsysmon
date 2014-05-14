@@ -11,7 +11,7 @@ namespace NSysmon.Core.WMI
         private static log4net.ILog Logger = log4net.LogManager.GetLogger(typeof(WindowsServerNode));
 
         public override string NodeType { get { return "Windows Server"; } }
-        public override int MinSecondsBetweenPolls { get { return 2; } }
+        public override int MinSecondsBetweenPolls { get { return 10; } }
 
         private readonly WindowsServerNodeSettings settings;
         public string NodeName { get; private set; }
