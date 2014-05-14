@@ -19,6 +19,6 @@ namespace NSysmon.Core.WMI
         public bool PhysicalAdapter { get; set; }
         public string ProductName { get; set; }
         public string Manufacturer { get; set; }
-        public DateTime TimeOfLastReset { get; set; }
+        public string TimeOfLastReset { get; set; } // "yyyyMMddHHmmss.ffffff-240"
     }
 }

@@ -191,7 +191,7 @@ namespace NSysmon.Core.WMI
             {
                 return _win32Volumes ?? (_win32Volumes = new PollNodeDataCache<List<Win32Volume>>()
                 {
-                    CacheForSeconds = 60 * 15, // 15 minutes
+                    CacheForSeconds = 60,
                     UpdateCachedData = UpdateCachedData(
                         description: string.Format("WMI Query Win32_Volume On Computer {0} ", settings.Host),
                         getData: () => Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
@@ -218,7 +218,7 @@ namespace NSysmon.Core.WMI
             {
                 return _win32ComputerSystem ?? (_win32ComputerSystem = new PollNodeDataCache<Win32ComputerSystem>()
                 {
-                    CacheForSeconds = 60 * 60, // 1 hour
+                    CacheForSeconds = 60,
                     UpdateCachedData = UpdateCachedData(
                         description: string.Format("WMI Query Win32_ComputerSystem/Win32_OperatingSystem On Computer {0} ", settings.Host),
                         getData: () =>
@@ -265,7 +265,7 @@ namespace NSysmon.Core.WMI
             {
                 return _win32NetworkAdapters ?? (_win32NetworkAdapters = new PollNodeDataCache<List<Win32NetworkAdapter>>()
                 {
-                    CacheForSeconds = 60 * 60, // 1 hour
+                    CacheForSeconds = 60,
                     UpdateCachedData = UpdateCachedData(
                         description: string.Format("WMI Query Win32_NetworkAdapter On Computer {0} ", settings.Host),
                         getData: () => Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
@@ -283,8 +283,8 @@ namespace NSysmon.Core.WMI
                                 PhysicalAdapter = (bool)mo["PhysicalAdapter"],
                                 ProductName = (mo["ProductName"] ?? string.Empty).ToString(),
                                 Manufacturer = (mo["Manufacturer"] ?? string.Empty).ToString(),
-                                //TimeOfLastReset = (DateTime)(mo["TimeOfLastReset"] ?? DateTime.MinValue),"20130923153336.095997-240"
-                                TimeOfLastReset = DateTime.ParseExact(mo["TimeOfLastReset"].ToString(), "yyyyMMddHHmmss.ffffff-240", DateTimeFormatInfo.InvariantInfo),
+                                TimeOfLastReset = (mo["TimeOfLastReset"] ?? string.Empty).ToString(),
+                                //TimeOfLastReset = DateTime.ParseExact(mo["TimeOfLastReset"].ToString(), "yyyyMMddHHmmss.ffffff-240", DateTimeFormatInfo.InvariantInfo),
                             })).Data.ToList()
                         ),
                 });

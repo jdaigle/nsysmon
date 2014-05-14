@@ -123,6 +123,14 @@ namespace NSysmon.Core
 
         public override MonitorStatus GetCachedDataMonitorStatus()
         {
+            if (LastPollStatus == PollStatus.Unknown)
+            {
+                return MonitorStatus.Warning;
+            }
+            if (LastPollStatus == PollStatus.Fail)
+            {
+                return MonitorStatus.Critical;
+            }
             if (cachedData is IMonitorStatus)
             {
                 return ((IMonitorStatus)cachedData).MonitorStatus;
@@ -136,6 +144,10 @@ namespace NSysmon.Core
 
         public override string GetCachedDataMonitorStatusReason()
         {
+            if (LastPollStatus != PollStatus.Success)
+            {
+                return ErrorMessage;
+            }
             if (cachedData is IMonitorStatus)
             {
                 return ((IMonitorStatus)cachedData).MonitorStatusReason;

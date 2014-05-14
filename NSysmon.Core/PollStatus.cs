@@ -11,7 +11,8 @@ namespace NSysmon.Core
     /// </remarks>
     public enum PollStatus
     {
-        Success = 0,
-        Fail = 1
+        Unknown = 0,
+        Success = 1,
+        Fail = 2,
     }
 }

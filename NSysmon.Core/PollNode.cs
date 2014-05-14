@@ -68,7 +68,7 @@ namespace NSysmon.Core
                             return CachedMonitorStatus.Value;
                         }
 
-                        var pollers = DataCaches.Where(dp => dp.AffectsNodeStatus).ToList();
+                        var pollers = DataCaches.Where(dp => dp.AffectsNodeStatus || dp.LastPollStatus != PollStatus.Success).ToList();
                         var fetchStatus = pollers.GetWorstStatus();
                         if (fetchStatus != MonitorStatus.Good)
                         {
