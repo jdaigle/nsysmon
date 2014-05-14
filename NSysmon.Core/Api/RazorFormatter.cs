@@ -9,6 +9,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using RazorEngine;
+using RazorEngine.Compilation;
 
 namespace NSysmon.Core.Api
 {
@@ -16,6 +17,10 @@ namespace NSysmon.Core.Api
     {
         public RazorFormatter()
         {
+            // make sure we load assemblies we plan to reference in the Views
+            typeof(Microsoft.CSharp.RuntimeBinder.Binder).Assembly.ToString();
+            typeof(System.Web.HttpUtility).Assembly.ToString();
+            CompilerServiceBuilder.SetCompilerServiceFactory(new DefaultCompilerServiceFactory());
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/xhtml+xml"));
         }
