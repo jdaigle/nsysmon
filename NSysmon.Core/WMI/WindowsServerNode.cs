@@ -125,10 +125,12 @@ namespace NSysmon.Core.WMI
                     UpdateCachedData = UpdateCachedData(
                         description: string.Format("WMI Query Win32_PerfFormattedData_Tcpip_NetworkInterface On Computer {0} ", settings.Host),
                         getData: () => Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
-                            "select Name, BytesReceivedPerSec, BytesSentPerSec, CurrentBandwidth from Win32_PerfFormattedData_Tcpip_NetworkInterface",
+                            "select Name, Caption, Description, BytesReceivedPerSec, BytesSentPerSec, CurrentBandwidth from Win32_PerfFormattedData_Tcpip_NetworkInterface",
                             results => results.Select(mo => new TcpipNetworkInterface()
                             {
                                 Name = (mo["name"] ?? string.Empty).ToString(),
+                                Caption = (mo["Caption"] ?? string.Empty).ToString(),
+                                Description = (mo["Description"] ?? string.Empty).ToString(),
                                 BytesReceivedPerSec = (UInt64)mo["BytesReceivedPerSec"],
                                 BytesSentPerSec = (UInt64)mo["BytesSentPerSec"],
                                 CurrentBandwidth = (UInt64)mo["CurrentBandwidth"],
@@ -200,7 +202,7 @@ namespace NSysmon.Core.WMI
                                 DriveLetter = (mo["driveletter"] ?? string.Empty).ToString(),
                                 FileSystem = (mo["filesystem"] ?? string.Empty).ToString(),
                                 Capacity = (UInt64)(mo["capacity"] ?? (UInt64)0),
-                                FreeSpace = (UInt64)(mo["freespace"] ?? (UInt64)0), 
+                                FreeSpace = (UInt64)(mo["freespace"] ?? (UInt64)0),
                             })).Data.ToList()
                         ),
                 });
