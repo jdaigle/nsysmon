@@ -33,6 +33,25 @@ The design is still in the very early prototype phase. Some of our ideas include
   produce trend graphs.
 * API to expose the data to front-end dashboard and admin control panels.
 
+## SQL Server Security
+
+The NSysmon login needs the following roles and permissions on each SQL Server:
+
+    use [master];
+    GRANT VIEW ANY DATABASE TO <USER OR role>;
+    GRANT VIEW ANY DEFINITION TO <USER OR role>;
+    GRANT VIEW SERVER STATE TO <USER OR role>;
+    USE [msdb];
+    CREATE USER [nsysmonagent] FOR LOGIN <USER OR role>;
+    EXEC sp_addrolemember N'db_datareader', N'<USER OR role>';
+    EXEC sp_addrolemember N'SQLAgentOperatorRole', N'<USER OR role>';
+    EXEC sp_addrolemember N'SQLAgentUserRole', N'<USER OR role>';
+    EXEC sp_addrolemember N'SQLAgentReaderRole', N'<USER OR role>';
+    GRANT EXECUTE ON [msdb].[dbo].[agent_datetime] TO <USER OR role>;
+
+**Important Note**: In order to query _SqlDatabaseVLFInfo_, the login also needs
+to be in the `sysadmin` role and have the `CONTROL SERVER` permission.
+
 ## Credits
 
 Many aspects of the architecture, and several code files are derived
