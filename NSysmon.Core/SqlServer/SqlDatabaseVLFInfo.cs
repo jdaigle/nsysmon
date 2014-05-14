@@ -32,6 +32,8 @@ Create Table #vlfTemp (
     CreateLSN nvarchar(255)
 );
 
+IF EXISTS (SELECT * FROM fn_my_permissions(NULL, 'SERVER') WHERE permission_name = 'CONTROL SERVER')
+BEGIN
 Declare @sql nvarchar(max);
 Set @sql = '';
 Select @sql = @sql + ' Insert #vlfTemp Exec ' + QuoteName(name) + '.sys.sp_executesql N''DBCC LOGINFO WITH NO_INFOMSGS'';
@@ -39,8 +41,9 @@ Select @sql = @sql + ' Insert #vlfTemp Exec ' + QuoteName(name) + '.sys.sp_execu
   Truncate Table #vlfTemp;'
   From sys.databases
   Where state <> 6; -- Skip OFFLINE databases as they cause errors
-
 Exec sp_executesql @sql;
+END
+
 Select * From #VLFCounts;
 Drop Table #VLFCounts;
 Drop Table #vlfTemp;";
