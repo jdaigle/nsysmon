@@ -78,6 +78,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Api\ApiExceptionFilterAttribute.cs" />
     <Compile Include="Api\NodeListViewModel.cs" />
     <Compile Include="Api\NodeStatusViewModel.cs" />
     <Compile Include="Api\RazorFormatter.cs" />

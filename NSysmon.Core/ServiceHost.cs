@@ -96,6 +96,7 @@ namespace NSysmon.Core
             // Attribute routing.
             hostConfig.MapHttpAttributeRoutes();
             hostConfig.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            hostConfig.Filters.Add(new ApiExceptionFilterAttribute());
 
             using (var server = new HttpSelfHostServer(hostConfig))
             {
