@@ -18,49 +18,43 @@ namespace NSysmon.Core.WMI
         public static QueryResult<T> Query<T>(string machineName, WMIPollingSettings wps, string query, Func<IEnumerable<ManagementObject>, IEnumerable<T>> conversion)
         {
             var timer = Stopwatch.StartNew();
-            QueryResult<T> queryResult = null;
-            ExecuteInManagementScopeLock(machineName, wps, scope =>
+            var scope = GetManagementScope(machineName, wps);
+            var searcher = GetManagementObjectSearcher(machineName, query, scope);
+            using (var results = searcher.Get())
             {
-                using (var searcher = new ManagementObjectSearcher(scope, new ObjectQuery(query)))
+                var queryResults = results.Cast<ManagementObject>();
+                timer.Stop();
+                return new QueryResult<T>
                 {
-                    using (var results = searcher.Get())
-                    {
-                        var queryResults = results.Cast<ManagementObject>();
-                        timer.Stop();
-                        queryResult = new QueryResult<T>
-                        {
-                            Duration = timer.Elapsed,
-                            Data = conversion(queryResults).ToList()
-                        };
-                    }
-                }
-            });
-            return queryResult;
+                    Duration = timer.Elapsed,
+                    Data = conversion(queryResults).ToList()
+                };
+            }
         }
 
-        public static void ExecuteInManagementScopeLock(string machineName, WMIPollingSettings wps, Action<ManagementScope> action)
+        public static ManagementObjectSearcher GetManagementObjectSearcher(string machineName, string query, ManagementScope scope)
         {
-            //if (!ManagementScopeLocks.ContainsKey(machineName.ToLower()))
-            //{
-            //    ManagementScopeLocks.TryAdd(machineName.ToLower(), new object());
-            //}
-            //var managementScopeLock = ManagementScopeLocks[machineName.ToLower()];
-            //lock (managementScopeLock)
-            //{
-                if (!ManagementScopes.ContainsKey(machineName.ToLower()))
-                {
-                    var newScope = new ManagementScope(string.Format(@"\\{0}\root\cimv2", machineName), GetConnectOptions(machineName, wps));
-                    ManagementScopes.TryAdd(machineName.ToLower(), newScope);
-                }
-                var scope = ManagementScopes[machineName.ToLower()];
-                if (action != null)
-                {
-                    action(scope);
-                }
-            //}
+            var key = (machineName + query).ToLower();
+            if (!ManagementObjectSearchers.ContainsKey(key))
+            {
+                var searcher = new ManagementObjectSearcher(scope, new ObjectQuery(query));
+                ManagementObjectSearchers.TryAdd(key, searcher);
+            }
+            return ManagementObjectSearchers[key];
         }
 
-        private static readonly ConcurrentDictionary<string, object> ManagementScopeLocks = new ConcurrentDictionary<string, object>();
+        private static readonly ConcurrentDictionary<string, ManagementObjectSearcher> ManagementObjectSearchers = new ConcurrentDictionary<string, ManagementObjectSearcher>();
+
+        public static ManagementScope GetManagementScope(string machineName, WMIPollingSettings wps)
+        {
+            if (!ManagementScopes.ContainsKey(machineName.ToLower()))
+            {
+                var newScope = new ManagementScope(string.Format(@"\\{0}\root\cimv2", machineName), GetConnectOptions(machineName, wps));
+                ManagementScopes.TryAdd(machineName.ToLower(), newScope);
+            }
+            return ManagementScopes[machineName.ToLower()];
+        }
+
         private static readonly ConcurrentDictionary<string, ManagementScope> ManagementScopes = new ConcurrentDictionary<string, ManagementScope>();
 
         public static ConnectionOptions GetConnectOptions(string machineName, WMIPollingSettings wps)
