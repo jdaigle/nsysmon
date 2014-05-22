@@ -2,11 +2,11 @@
 using System.IO;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
-using System.Threading;
 using System.Web.Http;
 using System.Web.Http.SelfHost;
 using NSysmon.Core.Api;
 using NSysmon.Core.Syslog;
+
 namespace NSysmon.Core
 {
     public class ServiceHost
@@ -53,11 +53,17 @@ namespace NSysmon.Core
             public int listenerPort { get; set; }
         }
 
-        private EventWaitHandle stopServerSignal;
+        private HttpSelfHostServer httpServer;
 
         public void Stop()
         {
-            stopServerSignal.Set();
+            // stop server
+            if (httpServer != null)
+            {
+                httpServer.CloseAsync().Wait();
+            }
+            // stop polling
+            PollingEngine.StopPolling();
         }
 
         public void Start()
@@ -82,7 +88,7 @@ namespace NSysmon.Core
                 startListener.BeginInvoke(514, null, null);
             }
 
-            var hostConfig = new HttpSelfHostConfiguration("http://127.0.0.1:"+config.http.listenerPort);
+            var hostConfig = new HttpSelfHostConfiguration("http://127.0.0.1:" + config.http.listenerPort);
             // Remove the XML formatter
             hostConfig.Formatters.Remove(hostConfig.Formatters.XmlFormatter);
             hostConfig.Formatters.Add(new RazorFormatter());
@@ -98,16 +104,8 @@ namespace NSysmon.Core
             hostConfig.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             hostConfig.Filters.Add(new ApiExceptionFilterAttribute());
 
-            using (var server = new HttpSelfHostServer(hostConfig))
-            {
-                server.OpenAsync().Wait();
-                stopServerSignal = new ManualResetEvent(false);
-                stopServerSignal.WaitOne();
-                // stop server
-                server.CloseAsync().Wait();
-            }
-            // stop polling
-            PollingEngine.StopPolling();
+            httpServer = new HttpSelfHostServer(hostConfig);
+            httpServer.OpenAsync().Wait();
         }
     }
 }
