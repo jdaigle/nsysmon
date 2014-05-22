@@ -68,8 +68,8 @@ namespace NSysmon.Core.Api
                     PollsTotal = dataCache.PollsTotal,
                     CacheFailureForSeconds = dataCache.CacheFailureForSeconds,
                     CacheForSecond = dataCache.CacheForSeconds,
-                    CachedDataCount = dataCache.ContainsCachedData ? (dataCache.CachedData is IList ? ((IList)dataCache.CachedData).Count : dataCache.CachedData != null ? 1 : 0) : 0,
-                    CachedData = includeData == true ? ToObjectArray(dataCache.ContainsCachedData, dataCache.CachedData) : new object[0],
+                    CachedDataCount = dataCache.ContainsCachedData() ? (dataCache.CachedData is IList ? ((IList)dataCache.CachedData).Count : dataCache.CachedData != null ? 1 : 0) : 0,
+                    CachedData = includeData == true ? ToObjectArray(dataCache.ContainsCachedData(), dataCache.CachedData) : new object[0],
                     //CachedTrendData = dataCache.CachedTrendData.Select(d => new
                     //{
                     //    DateTime = d.Item1,

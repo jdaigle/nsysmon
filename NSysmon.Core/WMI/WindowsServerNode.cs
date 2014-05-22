@@ -51,6 +51,22 @@ namespace NSysmon.Core.WMI
             return null;
         }
 
+        public bool IsWindowsServer2008CompatOrBetter()
+        {
+            return char.IsNumber(TryGetOSVersion()[0]) && int.Parse(TryGetOSVersion()[0].ToString()) >= 6;
+        }
+
+        public string TryGetOSVersion()
+        {
+            if (_win32ComputerSystem != null
+                && _win32ComputerSystem.ContainsCachedData() 
+                && _win32ComputerSystem.Data != null)
+            {
+                return _win32ComputerSystem.Data.OSVersion;
+            }
+            return "Unknown";
+        }
+
         private PollNodeDataCache<List<PerfOSProcessor>> _perfOSProcessor;
         public PollNodeDataCache<List<PerfOSProcessor>> PerfOSProcessor
         {
@@ -126,17 +142,25 @@ namespace NSysmon.Core.WMI
                 {
                     UpdateCachedData = UpdateCachedData(
                         description: string.Format("WMI Query Win32_PerfFormattedData_Tcpip_NetworkInterface On Computer {0} ", settings.Host),
-                        getData: () => Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
-                            "select Name, Caption, Description, BytesReceivedPerSec, BytesSentPerSec, CurrentBandwidth from Win32_PerfFormattedData_Tcpip_NetworkInterface",
-                            results => results.Select(mo => new TcpipNetworkInterface()
+                        getData: () => 
+                        {
+                            if (!IsWindowsServer2008CompatOrBetter())
                             {
-                                Name = (mo["name"] ?? string.Empty).ToString(),
-                                Caption = (mo["Caption"] ?? string.Empty).ToString(),
-                                Description = (mo["Description"] ?? string.Empty).ToString(),
-                                BytesReceivedPerSec = (UInt64)mo["BytesReceivedPerSec"],
-                                BytesSentPerSec = (UInt64)mo["BytesSentPerSec"],
-                                CurrentBandwidth = (UInt64)mo["CurrentBandwidth"],
-                            })).Data.ToList()
+                                return new List<TcpipNetworkInterface>();
+                            }
+                            return
+                                Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
+                                "select Name, Caption, Description, BytesReceivedPerSec, BytesSentPerSec, CurrentBandwidth from Win32_PerfFormattedData_Tcpip_NetworkInterface",
+                                results => results.Select(mo => new TcpipNetworkInterface()
+                                {
+                                    Name = (mo["name"] ?? string.Empty).ToString(),
+                                    Caption = (mo["Caption"] ?? string.Empty).ToString(),
+                                    Description = (mo["Description"] ?? string.Empty).ToString(),
+                                    BytesReceivedPerSec = (UInt64)mo["BytesReceivedPerSec"],
+                                    BytesSentPerSec = (UInt64)mo["BytesSentPerSec"],
+                                    CurrentBandwidth = (UInt64)mo["CurrentBandwidth"],
+                                })).Data.ToList();
+                        }
                     ),
                 });
             }
@@ -268,24 +292,32 @@ namespace NSysmon.Core.WMI
                     CacheForSeconds = 60,
                     UpdateCachedData = UpdateCachedData(
                         description: string.Format("WMI Query Win32_NetworkAdapter On Computer {0} ", settings.Host),
-                        getData: () => Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
-                            "select Name, Description, AdapterType, AdapterTypeId, MACAddress, NetConnectionID, NetConnectionStatus, NetEnabled, physicaladapter, ProductName, Manufacturer, TimeOfLastReset from Win32_NetworkAdapter",
-                            results => results.Select(mo => new Win32NetworkAdapter()
+                        getData: () =>
                             {
-                                Name = (mo["Name"] ?? string.Empty).ToString(),
-                                Description = (mo["Description"] ?? string.Empty).ToString(),
-                                AdapterType = (mo["AdapterType"] ?? string.Empty).ToString(),
-                                AdapterTypeId = (UInt16)(mo["AdapterTypeId"] ?? (UInt16)0),
-                                MACAddress = (mo["MACAddress"] ?? string.Empty).ToString(),
-                                NetConnectionID = (mo["NetConnectionID"] ?? string.Empty).ToString(),
-                                NetConnectionStatus = (UInt16)(mo["NetConnectionStatus"] ?? (UInt16)0),
-                                NetEnabled = (bool)(mo["NetEnabled"] ?? false),
-                                PhysicalAdapter = (bool)mo["PhysicalAdapter"],
-                                ProductName = (mo["ProductName"] ?? string.Empty).ToString(),
-                                Manufacturer = (mo["Manufacturer"] ?? string.Empty).ToString(),
-                                TimeOfLastReset = (mo["TimeOfLastReset"] ?? string.Empty).ToString(),
-                                //TimeOfLastReset = DateTime.ParseExact(mo["TimeOfLastReset"].ToString(), "yyyyMMddHHmmss.ffffff-240", DateTimeFormatInfo.InvariantInfo),
-                            })).Data.ToList()
+                                if (!IsWindowsServer2008CompatOrBetter())
+                                {
+                                    return new List<Win32NetworkAdapter>();
+                                }
+                                return
+                                    Instrumentation.Query(settings.Host, settings.WMIPollingSettings,
+                                    "select Name, Description, AdapterType, AdapterTypeId, MACAddress, NetConnectionID, NetConnectionStatus, NetEnabled, physicaladapter, ProductName, Manufacturer, TimeOfLastReset from Win32_NetworkAdapter",
+                                    results => results.Select(mo => new Win32NetworkAdapter()
+                                    {
+                                        Name = (mo["Name"] ?? string.Empty).ToString(),
+                                        Description = (mo["Description"] ?? string.Empty).ToString(),
+                                        AdapterType = (mo["AdapterType"] ?? string.Empty).ToString(),
+                                        AdapterTypeId = (UInt16)(mo["AdapterTypeId"] ?? (UInt16)0),
+                                        MACAddress = (mo["MACAddress"] ?? string.Empty).ToString(),
+                                        NetConnectionID = (mo["NetConnectionID"] ?? string.Empty).ToString(),
+                                        NetConnectionStatus = (UInt16)(mo["NetConnectionStatus"] ?? (UInt16)0),
+                                        NetEnabled = (bool)(mo["NetEnabled"] ?? false),
+                                        PhysicalAdapter = (bool)mo["PhysicalAdapter"],
+                                        ProductName = (mo["ProductName"] ?? string.Empty).ToString(),
+                                        Manufacturer = (mo["Manufacturer"] ?? string.Empty).ToString(),
+                                        TimeOfLastReset = (mo["TimeOfLastReset"] ?? string.Empty).ToString(),
+                                        //TimeOfLastReset = DateTime.ParseExact(mo["TimeOfLastReset"].ToString(), "yyyyMMddHHmmss.ffffff-240", DateTimeFormatInfo.InvariantInfo),
+                                    })).Data.ToList();
+                            }
                         ),
                 });
             }
@@ -304,10 +336,20 @@ namespace NSysmon.Core.WMI
                         getData: () =>
                             {
                                 var p = pinger.Send(settings.Host);
+                                if (p == null)
+                                {
+                                    return new PingResult()
+                                    {
+                                        RoundtripTime = 0,
+                                        Ttl = 0,
+                                        BufferLength = 0,
+                                        Status = "pinger.Send is null",
+                                    };
+                                }
                                 return new PingResult
                                 {
                                     RoundtripTime = p.RoundtripTime,
-                                    Ttl = p.Options.Ttl,
+                                    Ttl = p.Options != null ? p.Options.Ttl : 0,
                                     BufferLength = p.Buffer.Length,
                                     Status = p.Status.ToString(),
                                 };

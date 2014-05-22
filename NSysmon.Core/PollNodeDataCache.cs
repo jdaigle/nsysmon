@@ -80,7 +80,7 @@ namespace NSysmon.Core
             }
         }
 
-        public abstract bool ContainsCachedData { get; }
+        public abstract bool ContainsCachedData();
         public abstract object CachedData { get; }
         public virtual Type Type { get { return typeof(PollNodeDataCache); } }
 
@@ -103,7 +103,7 @@ namespace NSysmon.Core
         {
         }
 
-        public override bool ContainsCachedData { get { return cachedData != null; } }
+        public override bool ContainsCachedData() { return cachedData != null; }
         public override object CachedData { get { return cachedData; } }
         public override Type Type { get { return typeof(T); } }
 

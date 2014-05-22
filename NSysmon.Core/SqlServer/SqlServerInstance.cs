@@ -54,14 +54,14 @@ namespace NSysmon.Core.SqlServer
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
         {
-            if (Databases != null && Databases.ContainsCachedData)
+            if (Databases != null && Databases.ContainsCachedData())
             {
                 yield return Databases.Data.GetWorstStatus();
             }
         }
         protected override string GetMonitorStatusReason()
         {
-            return (Databases != null && Databases.ContainsCachedData) ? Databases.Data.GetReasonSummary() : null;
+            return (Databases != null && Databases.ContainsCachedData()) ? Databases.Data.GetReasonSummary() : null;
         }
 
         /// <summary>
