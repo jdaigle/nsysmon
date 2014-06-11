@@ -36,8 +36,9 @@
     <Reference Include="Dapper">
       <HintPath>..\packages\Dapper.1.13\lib\net45\Dapper.dll</HintPath>
     </Reference>
-    <Reference Include="log4net">
-      <HintPath>..\external-bin\log4net.dll</HintPath>
+    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
@@ -136,7 +137,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Api\NodeList.cshtml" />
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <Content Include="config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
