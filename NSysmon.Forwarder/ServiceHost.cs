@@ -1,36 +1,87 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Text;
 using System.Threading;
+using log4net;
 
 namespace NSysmon.Forwarder
 {
     public class ServiceHost
     {
+        private static readonly ILog log = LogManager.GetLogger("NSysmon.Forwarder");
+
         public void Stop()
         {
         }
 
-        public void Start()
+            public void Start()
         {
             System.Threading.Tasks.Task.Factory.StartNew(() =>
             {
-                var counters = new PerformanceCounters("odysseus", includeSQLServerCounters: true);
+                var counters = new PerformanceCounters("",
+                    includeSQLServerCounters: true);
+                var syslogForwarder = new UdpClient();
+                syslogForwarder.Connect("localhost", 514);
+                var sw = Stopwatch.StartNew();
                 while (true)
                 {
-                    Console.Clear();
+                    sw.Restart();
                     foreach (var counter in counters)
-                    {                        
+                    {
                         var nextValue = counter.NextValue();
-                        var timestamp = DateTime.UtcNow;
-                        var key = GetCounterKey(counter);
-                        var value = Newtonsoft.Json.JsonConvert.SerializeObject(new CounterTimestamp(timestamp, nextValue));
-                        Console.WriteLine(string.Format("{0} - {1} - {2} - {3}", counter.CategoryName, counter.CounterName, counter.InstanceName.Length > 10 ? counter.InstanceName.Substring(0, 10) : counter.InstanceName, nextValue));
+                        var timestamp = DateTime.Now;
+                        var datagram = GetSyslogDatagram(counter, nextValue, timestamp);
+                        var bytesSend = syslogForwarder.Send(datagram, datagram.Length);
+                        log.Debug("Sending " + datagram.Length + " bytes");
+                        if (bytesSend != datagram.Length)
+                        {
+                            log.ErrorFormat("bytes sent " + bytesSend + " does not equal datagram length " + datagram.Length);
+                        }
                     }
+                    sw.Stop();
+                    log.Info(string.Format("Queried {0} counters in {1} ms", counters.Count, sw.Elapsed.TotalMilliseconds));
                     Thread.Sleep(10 * 1000);
                 }
             });
+        }
+
+        private static byte[] GetSyslogDatagram(PerformanceCounter counter, float value, DateTime timestamp)
+        {
+            var header = string.Format("<134>{0} {1} {2}:", timestamp.ToString("MMM dd HH:mm:ss", CultureInfo.InvariantCulture), GetFQDN(), GetProcess());
+            var perfcounter = string.Format("PC \"{0}\" \"{1}\" \"{2}\" \"{3}\"", counter.CategoryName, counter.CounterName, counter.InstanceName, value);
+            return Encoding.ASCII.GetBytes(header + perfcounter);
+        }
+
+        private static string process;
+        private static string GetProcess()
+        {
+            if (process == null)
+            {
+                process = string.Format("{0}[{1}]", Process.GetCurrentProcess().ProcessName, Process.GetCurrentProcess().Id);
+            }
+            return process;
+        }
+
+        private static string hostName;
+        public static string GetFQDN()
+        {
+            if (hostName == null)
+            {
+                // see: http://stackoverflow.com/a/804719/507
+                var domainName = IPGlobalProperties.GetIPGlobalProperties().DomainName;
+                hostName = Dns.GetHostName();
+                if (!hostName.Contains(domainName))            // if the hostname does not already include the domain name
+                {
+                    hostName = hostName + "." + domainName;   // add the domain name part
+                }
+            }
+            return hostName;                              // return the fully qualified domain name
         }
 
         private static string GetCounterKey(PerformanceCounter counter)
