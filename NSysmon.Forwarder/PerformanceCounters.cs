@@ -18,59 +18,115 @@ namespace NSysmon.Forwarder
         public string Machine { get; set; }
         public bool IncludeSQLServerCounters { get; set; }
 
+        private void AddPerformanceCounter(string categoryName, string counterName, string instanceName)
+        {
+            if (!CounterExists(categoryName, counterName))
+            {
+                return;
+            }
+            if (!string.IsNullOrWhiteSpace(Machine))
+            {
+                this.Add(new PerformanceCounter(categoryName, counterName, instanceName, Machine));
+            }
+            else
+            {
+                this.Add(new PerformanceCounter(categoryName, counterName, instanceName));
+            }
+        }
+
+        private string[] GetCounterCategoryInstanceNames(string category)
+        {
+            if (!string.IsNullOrWhiteSpace(Machine))
+            {
+                return new PerformanceCounterCategory(category, Machine).GetInstanceNames();
+            }
+            else
+            {
+                return new PerformanceCounterCategory(category).GetInstanceNames();
+            }
+        }
+
+        private bool CategoryExists(string category)
+        {
+            if (!string.IsNullOrWhiteSpace(Machine))
+            {
+                return PerformanceCounterCategory.Exists(category, Machine);
+            }
+            else
+            {
+                return PerformanceCounterCategory.Exists(category);
+            }
+        }
+
+        private bool CounterExists(string category, string counter)
+        {
+            if (!CategoryExists(category))
+            {
+                return false;
+            }
+            if (!string.IsNullOrWhiteSpace(Machine))
+            {
+                return PerformanceCounterCategory.CounterExists(counter, category, Machine);
+            }
+            else
+            {
+                return PerformanceCounterCategory.CounterExists(counter, category);
+            }
+        }
+
         private void SetupCounters()
         {
-            this.Add(new PerformanceCounter("Memory", "Available MBytes", "", Machine));
-            this.Add(new PerformanceCounter("Paging File", "% Usage", "_Total", Machine));
-            this.Add(new PerformanceCounter("System", "Processor Queue Length", "", Machine));
-            foreach (var instance in new PerformanceCounterCategory("Processor", Machine).GetInstanceNames())
+            this.AddPerformanceCounter("Memory", "Available MBytes", "");
+            this.AddPerformanceCounter("Paging File", "% Usage", "_Total");
+            this.AddPerformanceCounter("System", "Processor Queue Length", "");
+            foreach (var instance in GetCounterCategoryInstanceNames("Processor"))
             {
                 if (instance == "_Total")
                 {
                     // only check real processors
                     continue;
                 }
-                this.Add(new PerformanceCounter("Processor", "% Processor Time", instance, Machine));
+                this.AddPerformanceCounter("Processor", "% Processor Time", instance);
             }
-            foreach (var instance in new PerformanceCounterCategory("PhysicalDisk", Machine).GetInstanceNames())
+            foreach (var instance in GetCounterCategoryInstanceNames("PhysicalDisk"))
             {
                 if (instance == "_Total")
                 {
                     // only check real disks
                     continue;
                 }
-                this.Add(new PerformanceCounter("PhysicalDisk", "Avg. Disk sec/Read", instance, Machine));
-                this.Add(new PerformanceCounter("PhysicalDisk", "Avg. Disk sec/Write", instance, Machine));
-                this.Add(new PerformanceCounter("PhysicalDisk", "Disk Reads/Sec", instance, Machine));
-                this.Add(new PerformanceCounter("PhysicalDisk", "Disk Writes/Sec", instance, Machine));
+                this.AddPerformanceCounter("PhysicalDisk", "Avg. Disk sec/Read", instance);
+                this.AddPerformanceCounter("PhysicalDisk", "Avg. Disk sec/Write", instance);
+                this.AddPerformanceCounter("PhysicalDisk", "Disk Reads/Sec", instance);
+                this.AddPerformanceCounter("PhysicalDisk", "Disk Writes/Sec", instance);
             }
-            foreach (var instance in new PerformanceCounterCategory("Network Interface", Machine).GetInstanceNames())
+            foreach (var instance in GetCounterCategoryInstanceNames("Network Interface"))
             {
-                this.Add(new PerformanceCounter("Network Interface", "Bytes Received/Sec", instance, Machine));
-                this.Add(new PerformanceCounter("Network Interface", "Bytes Sent/Sec", instance, Machine));
-                this.Add(new PerformanceCounter("Network Interface", "Current Bandwidth", instance, Machine));
+                this.AddPerformanceCounter("Network Interface", "Bytes Received/Sec", instance);
+                this.AddPerformanceCounter("Network Interface", "Bytes Sent/Sec", instance);
+                this.AddPerformanceCounter("Network Interface", "Current Bandwidth", instance);
             }
             if (IncludeSQLServerCounters)
             {
-                this.Add(new PerformanceCounter("SQLServer:Buffer Manager", "Page life expectancy", "", Machine));
-                this.Add(new PerformanceCounter("SQLServer:General Statistics", "User Connections", "", Machine));
-                this.Add(new PerformanceCounter("SQLServer:Memory Manager", "Memory Grants Pending", "", Machine));
-                this.Add(new PerformanceCounter("SQLServer:SQL Statistics", "Batch Requests/sec", "", Machine));
-                this.Add(new PerformanceCounter("SQLServer:SQL Statistics", "SQL Compilations/sec", "", Machine));
-                this.Add(new PerformanceCounter("SQLServer:SQL Statistics", "SQL Re-Compilations/sec", "", Machine));
+                this.AddPerformanceCounter("SQLServer:Buffer Manager", "Page life expectancy", "");
+                this.AddPerformanceCounter("SQLServer:General Statistics", "User Connections", "");
+                this.AddPerformanceCounter("SQLServer:Memory Manager", "Memory Grants Pending", "");
+                this.AddPerformanceCounter("SQLServer:SQL Statistics", "Batch Requests/sec", "");
+                this.AddPerformanceCounter("SQLServer:SQL Statistics", "SQL Compilations/sec", "");
+                this.AddPerformanceCounter("SQLServer:SQL Statistics", "SQL Re-Compilations/sec", "");
             }
-            foreach (var instance in new PerformanceCounterCategory("ASP.NET Applications", Machine).GetInstanceNames())
+            foreach (var instance in GetCounterCategoryInstanceNames("ASP.NET Applications"))
             {
                 if (instance == "__Total__")
                 {
                     // only check real app pools
                     continue;
                 }
-                this.Add(new PerformanceCounter("ASP.NET Applications", "Requests/Sec", instance, Machine));
-                this.Add(new PerformanceCounter("ASP.NET Applications", "Request Execution Time", instance, Machine));
-                this.Add(new PerformanceCounter("ASP.NET Applications", "Requests In Application Queue", instance, Machine));
-                this.Add(new PerformanceCounter("ASP.NET Applications", "Requests Executing", instance, Machine));
-                this.Add(new PerformanceCounter("ASP.NET Applications", "Request Wait Time", instance, Machine));
+                this.AddPerformanceCounter("ASP.NET Applications", "Requests/Sec", instance);
+                this.AddPerformanceCounter("ASP.NET Applications", "Request Execution Time", instance);
+                this.AddPerformanceCounter("ASP.NET Applications", "Requests In Application Queue", instance);
+                this.AddPerformanceCounter("ASP.NET Applications", "Requests Executing", instance);
+                this.AddPerformanceCounter("ASP.NET Applications", "Request Wait Time", instance);
             }
         }
     }
