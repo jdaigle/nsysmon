@@ -28,6 +28,7 @@ namespace NSysmon.Core.Syslog
                         {
                             var syslogDatagram = Encoding.ASCII.GetString(receiveBuffer);
                             Log.DebugFormat("Received Datagram From IP [{0}] : {1}", sourceIPAddress.ToString(), syslogDatagram);
+                            var datagram = SyslogDatagramParser.Parse(syslogDatagram, sourceIPAddress.ToString());
                             //var haproxySyslogMessage = HAProxySyslogMessage.Parse(syslogMessage, sourceIPAddress.ToString());
                             //if (haproxySyslogMessage != null)
                             //{

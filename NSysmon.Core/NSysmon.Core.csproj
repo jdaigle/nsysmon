@@ -116,6 +116,7 @@
     <Compile Include="SqlServer\SqlServerProperties.cs" />
     <Compile Include="SqlServer\SqlServerVersions.cs" />
     <Compile Include="SqlServer\TraceFlagInfo.cs" />
+    <Compile Include="Syslog\PerformanceCounterDatagram.cs" />
     <Compile Include="Syslog\HAProxySyslogDatagram.cs" />
     <Compile Include="Syslog\SyslogDatagram.cs" />
     <Compile Include="Syslog\SyslogDatagramParser.cs" />

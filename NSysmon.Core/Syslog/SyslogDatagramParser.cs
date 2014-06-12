@@ -30,10 +30,42 @@ namespace NSysmon.Core.Syslog
             {
                 return ParseHAProxySyslogDatagram(datagram, pri_severity, pri_facility, datagramDateTime, sourceIPAddress);
             }
+            else if (datagram.IndexOf("NSysmon.Forwarder[", StringComparison.InvariantCultureIgnoreCase) > 0)
+            {
+                return ParsePerformanceCounterDatagram(datagram, pri_severity, pri_facility, datagramDateTime, sourceIPAddress);
+            }
             else
             {
                 return null;
             }
+        }
+
+        public static PerformanceCounterDatagram ParsePerformanceCounterDatagram(string datagram, int severity, int facility, DateTime sentDateTime, string sourceIPAddress)
+        {
+            var parsedDatagram = new PerformanceCounterDatagram(datagram, severity, facility, sentDateTime, sourceIPAddress);
+            var i = datagram.IndexOf("NSysmon.Forwarder[", StringComparison.InvariantCultureIgnoreCase);
+            var header = datagram.Substring(0, i - 1);
+
+            parsedDatagram.Node_Name = header.Substring(header.LastIndexOf(' ') + 1);
+            if (parsedDatagram.Node_Name.Contains(':'))
+            {
+                // node name cannot contain ':' so this must not be it
+                parsedDatagram.Node_Name = sourceIPAddress;
+            }
+            i = datagram.IndexOf("NSysmon.Forwarder[", StringComparison.InvariantCultureIgnoreCase);
+            i += 7;
+            parsedDatagram.Pid = ParseString(datagram, i, ']', out i);
+            i += 2; // skip space
+            i += 3; // skip "PC "
+            parsedDatagram.PerformanceCounterCategory = ParseString(datagram, i, '"', out i);
+            i += 2; // skip space and quote
+            parsedDatagram.PerformanceCounterName = ParseString(datagram, i, '"', out i);
+            i += 2; // skip space and quote
+            parsedDatagram.PerformanceCounterInstance = ParseString(datagram, i, '"', out i);
+            i += 2; // skip space and quote
+            parsedDatagram.PerformanceCounterValue = ParseFloat(datagram, i, '"', out i);
+
+            return parsedDatagram;
         }
 
         public static HAProxySyslogDatagram ParseHAProxySyslogDatagram(string datagram, int severity, int facility, DateTime sentDateTime, string sourceIPAddress)
@@ -176,6 +208,19 @@ namespace NSysmon.Core.Syslog
             var s = ParseString(datagram, start_i, endChar, out i);
             end_i = i;
             return int.Parse(s);
+        }
+
+        public static float ParseFloat(string datagram, int start_i, char endChar, out int end_i)
+        {
+            var i = start_i;
+            var s = ParseString(datagram, start_i, endChar, out i);
+            end_i = i;
+            float d = 0;
+            if (!float.TryParse(s, out d))
+            {
+                float.Parse(s);
+            }
+            return d;
         }
     }
 }
