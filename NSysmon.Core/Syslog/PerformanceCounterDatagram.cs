@@ -15,11 +15,14 @@ namespace NSysmon.Core.Syslog
         public string Pid { get; set; }
 
         public string PerformanceCounterCategory { get; set; }
-
         public string PerformanceCounterName { get; set; }
-
         public string PerformanceCounterInstance { get; set; }
-
         public float PerformanceCounterValue { get; set; }
+
+        public override void Handle()
+        {
+            base.Handle();
+            PerfMon.Instance.Publish(Node_Name, this.SentDateTime, PerformanceCounterCategory, PerformanceCounterName, PerformanceCounterInstance, PerformanceCounterValue);
+        }
     }
 }

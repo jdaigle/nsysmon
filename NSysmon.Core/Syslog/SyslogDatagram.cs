@@ -21,5 +21,7 @@ namespace NSysmon.Core.Syslog
         public int Facility { get; private set; }
         public DateTime SentDateTime { get; private set; }
         public string SourceIPAddress { get; private set; }
+
+        public virtual void Handle() { }
     }
 }

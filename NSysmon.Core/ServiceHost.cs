@@ -68,6 +68,9 @@ namespace NSysmon.Core
 
         public void Start()
         {
+            // start the perfmon ring buffer
+            PerfMon.Instance.Init();
+
             var nodeConfigString = File.ReadAllText("config.json");
             var settings = new Newtonsoft.Json.JsonSerializerSettings
             {
