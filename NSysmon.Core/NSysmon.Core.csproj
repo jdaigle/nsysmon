@@ -96,8 +96,10 @@
     <Compile Include="Api\StatusController.cs" />
     <Compile Include="EnumExtensions.cs" />
     <Compile Include="ObjectExtensions.cs" />
+    <Compile Include="PerfMon\CounterDictionary.cs" />
+    <Compile Include="PerfMon\CounterDictionaryKey.cs" />
     <Compile Include="PerfMon\CounterValue.cs" />
-    <Compile Include="PerfMon\CounterValueHandler.cs" />
+    <Compile Include="PerfMon\PerfMonHandler.cs" />
     <Compile Include="PerfMon\Instance.cs" />
     <Compile Include="PingResult.cs" />
     <Compile Include="PollNodeDataCache.cs" />

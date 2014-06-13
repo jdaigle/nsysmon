@@ -15,7 +15,7 @@ namespace NSysmon.Core.PerfMon
         public static void Init()
         {
             var disruptor = new Disruptor<CounterValue>(() => new CounterValue(), ringSize, TaskScheduler.Default);
-            disruptor.HandleEventsWith(new CounterValueHandler());
+            disruptor.HandleEventsWith(new PerfMonHandler());
             ringBuffer = disruptor.Start();
         }
 
