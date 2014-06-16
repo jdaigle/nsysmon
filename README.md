@@ -4,7 +4,7 @@ The .NET based Network Monitoring System
 
 ## Architecture
 
-The NSysmon.Core library is the home of the `PollEngine` and designed around
+The NSysmon.Collector library is the home of the `PollEngine` and designed around
 the concept of a `PollNode` and a `DataCache`.
 
 A PollNode is an abstract class which should represent

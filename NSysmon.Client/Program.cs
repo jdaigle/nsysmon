@@ -26,7 +26,7 @@ namespace NSysmon.Client
                 var response = await client.GetAsync("api/nodes?includeData=true");
                 if (response.IsSuccessStatusCode)
                 {
-                    var nodes = await response.Content.ReadAsAsync<NSysmon.Core.Api.NodeListViewModel>();
+                    var nodes = await response.Content.ReadAsAsync<NSysmon.Collector.Api.NodeListViewModel>();
                 }
             }
         }

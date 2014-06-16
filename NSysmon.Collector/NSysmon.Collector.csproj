@@ -1,0 +1,179 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{0BAD2482-9AD4-4C6B-BE51-DF58EA00ECBF}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NSysmon.Collector</RootNamespace>
+    <AssemblyName>NSysmon.Collector</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Atomic">
+      <HintPath>..\packages\Disruptor.1.1.0\lib\net40\Atomic.dll</HintPath>
+    </Reference>
+    <Reference Include="Dapper">
+      <HintPath>..\packages\Dapper.1.13\lib\net45\Dapper.dll</HintPath>
+    </Reference>
+    <Reference Include="Disruptor">
+      <HintPath>..\packages\Disruptor.1.1.0\lib\net40\Disruptor.dll</HintPath>
+    </Reference>
+    <Reference Include="Disruptor.Scheduler">
+      <HintPath>..\packages\Disruptor.1.1.0\lib\net40\Disruptor.Scheduler.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NWhisper">
+      <HintPath>..\..\nwhipser\NWhisper\bin\Debug\NWhisper.dll</HintPath>
+    </Reference>
+    <Reference Include="RazorEngine">
+      <HintPath>..\packages\RazorEngine.3.4.1\lib\net45\RazorEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.1.2\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.DataVisualization" />
+    <Reference Include="System.Web.Http, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.1.2\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.SelfHost, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.SelfHost.5.1.2\lib\net45\System.Web.Http.SelfHost.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.0.0\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Topshelf">
+      <HintPath>..\packages\Topshelf.3.1.3\lib\net40-full\Topshelf.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Api\ApiExceptionFilterAttribute.cs" />
+    <Compile Include="Api\CounterListViewModel.cs" />
+    <Compile Include="Api\NodeListViewModel.cs" />
+    <Compile Include="Api\NodeStatusViewModel.cs" />
+    <Compile Include="Api\RazorFormatter.cs" />
+    <Compile Include="Api\RazorViewModelBase.cs" />
+    <Compile Include="Api\StatusController.cs" />
+    <Compile Include="EnumExtensions.cs" />
+    <Compile Include="ObjectExtensions.cs" />
+    <Compile Include="PerfMon\CounterDictionary.cs" />
+    <Compile Include="PerfMon\CounterDictionaryKey.cs" />
+    <Compile Include="PerfMon\CounterValue.cs" />
+    <Compile Include="PerfMon\PerfMonHandler.cs" />
+    <Compile Include="PerfMon\Instance.cs" />
+    <Compile Include="PingResult.cs" />
+    <Compile Include="PollNodeDataCache.cs" />
+    <Compile Include="DateTimeExtensions.cs" />
+    <Compile Include="ExceptionManager.cs" />
+    <Compile Include="IMonitorStatusExtensionMethods.cs" />
+    <Compile Include="MonitorStatus.cs" />
+    <Compile Include="PollingEngine.cs" />
+    <Compile Include="PollNode.cs" />
+    <Compile Include="PollStatus.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServiceHost.cs" />
+    <Compile Include="SqlServer\Enums.cs" />
+    <Compile Include="SqlServer\ISQLVersionedObject.cs" />
+    <Compile Include="SqlServer\PerfCounterRecord.cs" />
+    <Compile Include="SqlServer\SqlConfigurationOption.cs" />
+    <Compile Include="SqlServer\SqlCPUEvent.cs" />
+    <Compile Include="SqlServer\SqlDatabaseBackupInfo.cs" />
+    <Compile Include="SqlServer\SqlDatabaseFileInfo.cs" />
+    <Compile Include="SqlServer\SqlDatabaseInfo.cs" />
+    <Compile Include="SqlServer\SqlDatabaseVLFInfo.cs" />
+    <Compile Include="SqlServer\SqlJobInfo.cs" />
+    <Compile Include="SqlServer\SqlMemoryClerkSummaryInfo.cs" />
+    <Compile Include="SqlServer\SqlServerInstance.cs" />
+    <Compile Include="SqlServer\SqlServerInstanceSettings.cs" />
+    <Compile Include="SqlServer\SqlServerWindowsInfo.cs" />
+    <Compile Include="SqlServer\SqlServerProperties.cs" />
+    <Compile Include="SqlServer\SqlServerVersions.cs" />
+    <Compile Include="SqlServer\TraceFlagInfo.cs" />
+    <Compile Include="Syslog\PerformanceCounterDatagram.cs" />
+    <Compile Include="Syslog\HAProxySyslogDatagram.cs" />
+    <Compile Include="Syslog\SyslogDatagram.cs" />
+    <Compile Include="Syslog\SyslogDatagramParser.cs" />
+    <Compile Include="Syslog\SyslogListener.cs" />
+    <Compile Include="WMI\Instrumentation.cs" />
+    <Compile Include="WMI\PerfDiskPhysicalDisk.cs" />
+    <Compile Include="WMI\TcpipNetworkInterface.cs" />
+    <Compile Include="WMI\PerfOSSystem.cs" />
+    <Compile Include="WMI\PerfOSPagingFile.cs" />
+    <Compile Include="WMI\PerfOSMemory.cs" />
+    <Compile Include="WMI\PerfOSProcessor.cs" />
+    <Compile Include="WMI\QueryResult.cs" />
+    <Compile Include="WMI\Win32NetworkAdapter.cs" />
+    <Compile Include="WMI\Win32Volume.cs" />
+    <Compile Include="WMI\WMIPollingSettings.cs" />
+    <Compile Include="WMI\Win32ComputerSystem.cs" />
+    <Compile Include="WMI\WindowsServerNode.cs" />
+    <Compile Include="WMI\WindowsServerNodeSettings.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Api\NodeList.cshtml" />
+    <EmbeddedResource Include="Api\CounterList.cshtml" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+    <Content Include="config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Api\NodeStatus.cshtml" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

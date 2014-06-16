@@ -1,0 +1,53 @@
+﻿@model NSysmon.Collector.Api.NodeStatusViewModel
+@using System.Web
+@using NSysmon.Collector
+@{
+    dynamic node = Model;
+}
+<html>
+<head>
+    <title>Node Status</title>
+</head>
+<body>
+    <p>
+        <span><a href="~/api/nodes">Nodes</a></span> /
+        <span><a href="~/Api/node/@(HttpUtility.UrlEncode((string)node.NodeType))/@(HttpUtility.UrlEncode((string)node.UniqueKey))/status">@node.NodeType - @node.UniqueKey</a></span>
+    </p>
+    <h1>@node.NodeType - @node.UniqueKey</h1>
+    <h5>
+        <a href="~/Api/node/@(HttpUtility.UrlEncode((string)node.NodeType))/@(HttpUtility.UrlEncode((string)node.UniqueKey))/status?type=json">As JSON</a>
+        | <a href="~/Api/node/@(HttpUtility.UrlEncode((string)node.NodeType))/@(HttpUtility.UrlEncode((string)node.UniqueKey))/status?type=json&includeData=true">As JSON w/ Data</a>
+    </h5>
+    <ul>
+        <li>Node Type: <strong>@node.NodeType</strong></li>
+        <li>Unique Key: <strong>@node.UniqueKey</strong></li>
+        <li>Monitor Status: <strong>@node.MonitorStatus.ToString() - @node.MonitorStatusReason</strong></li>
+        <li>Last Poll (duration): <strong>@(((DateTime?)node.LastPoll).ToRelativeTime()) (@node.LastPollDuration.TotalMilliseconds ms)</strong></li>
+    </ul>
+    <table>
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Polls</th>
+                <th>Monitor Status</th>
+                <th>Last Poll (duration)</th>
+                <th>Next Poll (cache duration)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (dynamic data in node.DataCaches)
+            {
+                <tr>
+                    <td>@data.Type</td>
+                    <td>@data.Name</td>
+                    <td>@data.CachedDataCount (@data.PollsTotal polls @data.PollsSuccessful successful)</td>
+                    <td style="max-width: 300px;">@data.MonitorStatus.ToString() - @data.MonitorStatusReason</td>
+                    <td title="@(((DateTime)data.LastPoll).ToString())">@(((DateTime)data.LastPoll).ToRelativeTime()) (@data.LastPollDuration.TotalMilliseconds ms)</td>
+                    <td title="@(((DateTime)data.NextPoll).ToString())">@(((DateTime)data.NextPoll).ToRelativeTime()) (@data.CacheForSecond s)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>

@@ -62,9 +62,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NSysmon.Core\NSysmon.Core.csproj">
+    <ProjectReference Include="..\NSysmon.Collector\NSysmon.Collector.csproj">
       <Project>{0bad2482-9ad4-4c6b-be51-df58ea00ecbf}</Project>
-      <Name>NSysmon.Core</Name>
+      <Name>NSysmon.Collector</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
