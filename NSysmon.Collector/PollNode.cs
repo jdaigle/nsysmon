@@ -12,18 +12,42 @@ namespace NSysmon.Collector
     /// This code is derived from https://github.com/opserver/Opserver/tree/a170ea8bcda9f9e52d4aaff7339f3d198309369b
     /// under "The MIT License (MIT)". Copyright (c) 2013 Stack Exchange Inc.
     /// </remarks>
-    public abstract class PollNode : IMonitorStatus, IDisposable, IEquatable<PollNode>
+    public abstract class PollNode : IEquatable<PollNode>
     {
+        /// <summary>
+        /// A unique identifier for this PollNode
+        /// </summary>
+        public string UniqueKey { get; private set; }
+
+        protected PollNode(string uniqueKey)
+        {
+            UniqueKey = uniqueKey;
+        }
+
         private static log4net.ILog Logger = log4net.LogManager.GetLogger(typeof(PollNode));
 
-        private int _totalPolls;
-        private int _totalCachePolls;
+        /// <summary>
+        /// the number of times this node was polled since startup
+        /// </summary>
+        private int totalPolls;
+        /// <summary>
+        /// the number of times an inner poll was executed
+        /// </summary>
+        private int totalCachePolls;
 
+        /// <summary>
+        /// The minimum number of seconds we will wait before polling this node again
+        /// </summary>
         public abstract int MinSecondsBetweenPolls { get; }
+        /// <summary>
+        /// Description of the concrete type of this PollNode
+        /// </summary>
         public abstract string NodeType { get; }
+        /// <summary>
+        /// Enumerates the various data caches applicable to this poll node.
+        /// Each data cache will be refreshed during a POLL interval
+        /// </summary>
         public abstract IEnumerable<PollNodeDataCache> DataCaches { get; }
-        protected abstract IEnumerable<MonitorStatus> GetMonitorStatus();
-        protected abstract string GetMonitorStatusReason();
 
         /// <summary>
         /// Number of consecutive cache fetch failures before backing off of polling the entire node for <see cref="BackoffDuration"/>
@@ -34,91 +58,47 @@ namespace NSysmon.Collector
         /// </summary>
         protected virtual TimeSpan BackoffDuration { get { return TimeSpan.FromMinutes(2); } }
 
-        public string UniqueKey { get; private set; }
-
-        protected PollNode(string uniqueKey)
-        {
-            UniqueKey = uniqueKey;
-        }
-
         public DateTime? LastPoll { get; protected set; }
         public TimeSpan LastPollDuration { get; protected set; }
         protected int PollFailsInaRow = 0;
 
-        protected volatile bool _isPolling;
-        public bool IsPolling { get { return _isPolling; } }
-        protected Task _pollTask;
+        protected volatile bool isPolling;
+        public bool IsPolling { get { return isPolling; } }
+        protected Task pollTask;
         public virtual string PollTaskStatus
         {
-            get { return _pollTask != null ? _pollTask.Status.ToString() : "Not running"; }
+            get { return this.pollTask != null ? this.pollTask.Status.ToString() : "Not running"; }
         }
 
-        private readonly object _monitorStatusLock = new object();
-        protected MonitorStatus? CachedMonitorStatus;
-        public virtual MonitorStatus MonitorStatus
-        {
-            get
-            {
-                if (!CachedMonitorStatus.HasValue)
-                {
-                    lock (_monitorStatusLock)
-                    {
-                        if (CachedMonitorStatus.HasValue)
-                        {
-                            return CachedMonitorStatus.Value;
-                        }
-
-                        var pollers = DataCaches.Where(dp => dp.AffectsNodeStatus || dp.LastPollStatus != PollStatus.Success).ToList();
-                        var fetchStatus = pollers.GetWorstStatus();
-                        if (fetchStatus != MonitorStatus.Good)
-                        {
-                            CachedMonitorStatus = MonitorStatus.Critical;
-                            MonitorStatusReason =
-                                string.Join(", ", pollers.WithIssues()
-                                                         .GroupBy(g => g.MonitorStatus)
-                                                         .OrderByDescending(g => g.Key)
-                                                         .Select(
-                                                             g =>
-                                                             g.Key + ": " + string.Join(", ", g.Select(p => p.ParentMemberName))
-                                                      ));
-                        }
-                        else
-                        {
-                            CachedMonitorStatus = GetMonitorStatus().ToList().GetWorstStatus();
-                            MonitorStatusReason = CachedMonitorStatus == MonitorStatus.Good ? null : GetMonitorStatusReason();
-                        }
-                    }
-                }
-                return CachedMonitorStatus.GetValueOrDefault(MonitorStatus.Unknown);
-            }
-        }
-        public string MonitorStatusReason { get; private set; }
-
-        public virtual void Poll(bool force = false, bool sync = false)
+        public virtual void Poll()
         {
             // Don't poll more than once every n seconds, that's just rude
-            if (!force && DateTime.UtcNow < LastPoll.GetValueOrDefault().AddSeconds(MinSecondsBetweenPolls))
+            if (DateTime.UtcNow < LastPoll.GetValueOrDefault().AddSeconds(MinSecondsBetweenPolls))
+            {
                 return;
+            }
 
-            // If we're seeing a lot of poll failures in a row, back the hell off
-            if (!force && PollFailsInaRow >= FailsBeforeBackoff && DateTime.UtcNow < LastPoll.GetValueOrDefault() + BackoffDuration)
+            // If we're seeing a lot of poll failures in a row... then wait
+            if (PollFailsInaRow >= FailsBeforeBackoff && DateTime.UtcNow < LastPoll.GetValueOrDefault() + BackoffDuration)
+            {
                 return;
+            }
 
             // Prevent multiple poll threads for this node from running at once
-            if (_isPolling) return;
-            _isPolling = true;
+            if (isPolling)
+            {
+                return;
+            }
 
-            if (sync)
-                InnerPoll(force);
-            else
-                _pollTask = Task.Factory.StartNew(() => InnerPoll(force));
+            isPolling = true;
+            pollTask = Task.Factory.StartNew(() => InnerPoll());
         }
 
         /// <summary>
         /// Called on a background thread for when this node is ACTUALLY polling
         /// This is not called if we're not due for a poll when the pass runs
         /// </summary>
-        private void InnerPoll(bool force = false)
+        private void InnerPoll()
         {
             Logger.DebugFormat("Starting Poll of Node [{0} - {1}]", this.NodeType, this.UniqueKey);
             var sw = Stopwatch.StartNew();
@@ -127,69 +107,37 @@ namespace NSysmon.Collector
                 var polled = 0;
                 Parallel.ForEach(DataCaches, i =>
                 {
-                    var pollerResult = i.Poll(force);
-                    Interlocked.Add(ref polled, pollerResult);
+                    try
+                    {
+                        var pollerResult = i.Refresh();
+                        Interlocked.Add(ref polled, pollerResult);
+                    }
+                    catch (Exception e)
+                    {
+                        // handle the exception and move on
+                        PollFailsInaRow++;
+                        Logger.Error("Error During DataCache Refresh", e);
+                    }
                 });
                 LastPoll = DateTime.UtcNow;
-
-                Interlocked.Add(ref _totalCachePolls, polled);
-                Interlocked.Increment(ref _totalPolls);
+                Interlocked.Add(ref totalCachePolls, polled);
+                Interlocked.Increment(ref totalPolls);
+            }
+            catch (Exception e)
+            {
+                PollFailsInaRow++;
+                // the Refresh loop should not throw an exception, but
+                // we handle them as Fatal exceptions anyway
+                Logger.Fatal("Unexepcted exception in during Poll: ", e);
             }
             finally
             {
                 sw.Stop();
                 LastPollDuration = sw.Elapsed;
-                _isPolling = false;
-                _pollTask = null;
+                isPolling = false;
+                pollTask = null;
                 Logger.DebugFormat("End Poll of Node [{0} - {1}] in {2} ms.", this.NodeType, this.UniqueKey, LastPollDuration.TotalMilliseconds.ToString("N2"));
             }
-        }
-
-        /// <summary>
-        /// Invoked by a Cache instance on updating, using properties from the PollNode such as connection strings, etc.
-        /// </summary>
-        /// <typeparam name="T">Type of item in the cache</typeparam>
-        /// <param name="description">Description of the operation, used purely for profiling</param>
-        /// <param name="getData">The operation used to actually get data, e.g. <code>using (var conn = GetConnection()) { return getFromConnection(conn); }</code></param>
-        /// <param name="logExceptions">Whether to log any exceptions to the log</param>
-        /// <returns>A cache update action, used when creating a <see cref="Cache"/>.</returns>
-        /// <param name="addExceptionData">Optionally add exception data, e.g. <code>e => e.AddLoggedData("Server", Name)</code></param>
-        protected Action<PollNodeDataCache<T>> UpdateCachedData<T>(string description,
-                                                            Func<T> getData,
-                                                            bool logExceptions = false,
-                                                            Action<Exception> addExceptionData = null) where T : class
-        {
-            return cache =>
-            {
-                try
-                {
-                    Logger.DebugFormat("Getting Poller Data [{0}]", description);
-                    cache.Data = getData();
-                    cache.LastSuccess = cache.LastPoll = DateTime.UtcNow;
-                    cache.ErrorMessage = "";
-                    PollFailsInaRow = 0;
-                }
-                catch (Exception e)
-                {
-                    if (logExceptions)
-                    {
-                        if (addExceptionData != null)
-                        {
-                            addExceptionData(e);
-                        }
-                        ExceptionManager.LogException(e);
-                    }
-                    cache.LastPoll = DateTime.UtcNow;
-                    PollFailsInaRow++;
-                    cache.ErrorMessage = "Unable to fetch from " + NodeType + ": " + e.Message;
-                    if (e.InnerException != null)
-                    {
-                        cache.ErrorMessage += "\n" + e.InnerException.Message;
-                    }
-                    Logger.Error(cache.ErrorMessage, e);
-                }
-                CachedMonitorStatus = null;
-            };
         }
 
         public bool Equals(PollNode other)
@@ -204,27 +152,12 @@ namespace NSysmon.Collector
             return (UniqueKey != null ? UniqueKey.GetHashCode() : 0);
         }
 
-        public static bool operator ==(PollNode left, PollNode right)
-        {
-            return Equals(left, right);
-        }
-
-        public static bool operator !=(PollNode left, PollNode right)
-        {
-            return !Equals(left, right);
-        }
-
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
             return Equals((PollNode)obj);
-        }
-
-        public void Dispose()
-        {
-            PollingEngine.TryRemove(this);
         }
     }
 }

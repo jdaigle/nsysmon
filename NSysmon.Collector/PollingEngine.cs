@@ -149,32 +149,6 @@ namespace NSysmon.Collector
             _lastPollAll = DateTime.UtcNow;
         }
 
-        /// <summary>
-        /// Polls all caches on a specific PollNode
-        /// </summary>
-        /// <param name="nodeType">Type of node to poll</param>
-        /// <param name="key">Unique key of the node to poll</param>
-        /// <param name="cacheGuid">If included, the specific cache to poll</param>
-        /// <param name="sync">Whether to perform a synchronous poll operation (async by default)</param>
-        /// <returns>Whether the poll was successful</returns>
-        public static bool Poll(string nodeType, string key, Guid? cacheGuid = null, bool sync = false)
-        {
-            var node = AllPollNodes.FirstOrDefault(p => p.NodeType == nodeType && p.UniqueKey == key);
-            if (node == null)
-            {
-                return false;
-            }
-
-            if (cacheGuid.HasValue)
-            {
-                var cache = node.DataCaches.FirstOrDefault(p => p.UniqueId == cacheGuid);
-                return cache != null && cache.Poll(true) > 0;
-            }
-            // Polling an entire server
-            node.Poll(true, sync: sync);
-            return true;
-        }
-
         public static List<PollNode> GetNodes(string type)
         {
             return AllPollNodes.Where(pn => string.Equals(pn.NodeType, type, StringComparison.InvariantCultureIgnoreCase)).ToList();

@@ -13,8 +13,6 @@ namespace NSysmon.Collector.Api
         public DateTime? LastPoll { get; set; }
         public TimeSpan LastPollDuration { get; set; }
         public int MinSecondsBetweenPolls { get; set; }
-        public MonitorStatus MonitorStatus { get; set; }
-        public string MonitorStatusReason { get; set; }
         public string PollTaskStatus { get; set; }
         public int PollerCount { get; set; }
 
@@ -30,8 +28,6 @@ namespace NSysmon.Collector.Api
         public TimeSpan LastPollDuration { get; set; }
         public PollStatus LastPollStatus { get; set; }
         public DateTime? LastSuccess { get; set; }
-        public MonitorStatus MonitorStatus { get; set; }
-        public string MonitorStatusReason { get; set; }
         public DateTime NextPoll { get; set; }
         public long PollsSuccessful { get; set; }
         public long PollsTotal { get; set; }

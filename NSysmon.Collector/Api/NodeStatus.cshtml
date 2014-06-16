@@ -21,7 +21,6 @@
     <ul>
         <li>Node Type: <strong>@node.NodeType</strong></li>
         <li>Unique Key: <strong>@node.UniqueKey</strong></li>
-        <li>Monitor Status: <strong>@node.MonitorStatus.ToString() - @node.MonitorStatusReason</strong></li>
         <li>Last Poll (duration): <strong>@(((DateTime?)node.LastPoll).ToRelativeTime()) (@node.LastPollDuration.TotalMilliseconds ms)</strong></li>
     </ul>
     <table>
@@ -30,7 +29,6 @@
                 <th>Type</th>
                 <th>Name</th>
                 <th>Polls</th>
-                <th>Monitor Status</th>
                 <th>Last Poll (duration)</th>
                 <th>Next Poll (cache duration)</th>
             </tr>
@@ -42,7 +40,6 @@
                     <td>@data.Type</td>
                     <td>@data.Name</td>
                     <td>@data.CachedDataCount (@data.PollsTotal polls @data.PollsSuccessful successful)</td>
-                    <td style="max-width: 300px;">@data.MonitorStatus.ToString() - @data.MonitorStatusReason</td>
                     <td title="@(((DateTime)data.LastPoll).ToString())">@(((DateTime)data.LastPoll).ToRelativeTime()) (@data.LastPollDuration.TotalMilliseconds ms)</td>
                     <td title="@(((DateTime)data.NextPoll).ToString())">@(((DateTime)data.NextPoll).ToRelativeTime()) (@data.CacheForSecond s)</td>
                 </tr>

@@ -90,6 +90,7 @@
     <Compile Include="Api\RazorViewModelBase.cs" />
     <Compile Include="Api\StatusController.cs" />
     <Compile Include="EnumExtensions.cs" />
+    <Compile Include="JSONConfig.cs" />
     <Compile Include="ObjectExtensions.cs" />
     <Compile Include="PerfMon\CounterDictionary.cs" />
     <Compile Include="PerfMon\CounterDictionaryKey.cs" />
@@ -98,8 +99,6 @@
     <Compile Include="PollNodeDataCache.cs" />
     <Compile Include="DateTimeExtensions.cs" />
     <Compile Include="ExceptionManager.cs" />
-    <Compile Include="IMonitorStatusExtensionMethods.cs" />
-    <Compile Include="MonitorStatus.cs" />
     <Compile Include="PollingEngine.cs" />
     <Compile Include="PollNode.cs" />
     <Compile Include="PollStatus.cs" />
@@ -129,12 +128,7 @@
     <Compile Include="Syslog\SyslogDatagramParser.cs" />
     <Compile Include="Syslog\SyslogListener.cs" />
     <Compile Include="WMI\Instrumentation.cs" />
-    <Compile Include="WMI\PerfDiskPhysicalDisk.cs" />
     <Compile Include="WMI\TcpipNetworkInterface.cs" />
-    <Compile Include="WMI\PerfOSSystem.cs" />
-    <Compile Include="WMI\PerfOSPagingFile.cs" />
-    <Compile Include="WMI\PerfOSMemory.cs" />
-    <Compile Include="WMI\PerfOSProcessor.cs" />
     <Compile Include="WMI\QueryResult.cs" />
     <Compile Include="WMI\Win32NetworkAdapter.cs" />
     <Compile Include="WMI\Win32Volume.cs" />

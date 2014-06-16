@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 /// </remarks>
 namespace NSysmon.Collector.SqlServer
 {
-    public class SqlDatabaseInfo : ISQLVersionedObject, IMonitorStatus
+    public class SqlDatabaseInfo : ISQLVersionedObject
     {
         [JsonIgnore]
         public Version MinVersion { get { return SqlServerVersions.SQL2005.RTM; } }
@@ -23,48 +23,6 @@ namespace NSysmon.Collector.SqlServer
                 if (IsReadOnly) return "Read-only";
                 // TODO: Other statuses, e.g. Not Synchronizing
                 return State.GetDescription();
-            }
-        }
-
-        public MonitorStatus MonitorStatus
-        {
-            get
-            {
-                if (IsReadOnly)
-                    return MonitorStatus.Warning;
-
-                switch (State)
-                {
-                    case DatabaseStates.Restoring:
-                    case DatabaseStates.Recovering:
-                    case DatabaseStates.RecoveryPending:
-                        return MonitorStatus.Unknown;
-                    case DatabaseStates.Copying:
-                        return MonitorStatus.Warning;
-                    case DatabaseStates.Suspect:
-                    case DatabaseStates.Emergency:
-                    case DatabaseStates.Offline:
-                        return MonitorStatus.Critical;
-                    case DatabaseStates.Online:
-                    default:
-                        return MonitorStatus.Good;
-                }
-            }
-        }
-        public string MonitorStatusReason
-        {
-            get
-            {
-                if (IsReadOnly)
-                    return "Database is read-only";
-
-                switch (State)
-                {
-                    case DatabaseStates.Online:
-                        return null;
-                    default:
-                        return "Database State: " + State.GetDescription();
-                }
             }
         }
 

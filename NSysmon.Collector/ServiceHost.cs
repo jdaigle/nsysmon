@@ -11,49 +11,6 @@ namespace NSysmon.Collector
 {
     public class ServiceHost
     {
-        public class JSONConfig
-        {
-            public JSONConfig()
-            {
-                nodes = new JSONConfigNode[0];
-                syslog = new JSONConfigSyslog();
-                http = new JSONConfigHttp();
-            }
-
-            public JSONConfigNode[] nodes { get; set; }
-            public JSONConfigSyslog syslog { get; set; }
-            public JSONConfigHttp http { get; set; }
-        }
-
-        public class JSONConfigNode
-        {
-            public string type { get; set; }
-            public string name { get; set; }
-            public object settings { get; set; }
-        }
-
-        public class JSONConfigSyslog
-        {
-            public JSONConfigSyslog()
-            {
-                listenerEnabled = true;
-                listenerPort = 514;
-            }
-
-            public bool listenerEnabled { get; set; }
-            public int listenerPort { get; set; }
-        }
-
-        public class JSONConfigHttp
-        {
-            public JSONConfigHttp()
-            {
-                listenerPort = 8080;
-            }
-
-            public int listenerPort { get; set; }
-        }
-
         private HttpSelfHostServer httpServer;
 
         public void Stop()
@@ -75,13 +32,8 @@ namespace NSysmon.Collector
                 TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Auto,
             };
             var config = Newtonsoft.Json.JsonConvert.DeserializeObject<JSONConfig>(nodeConfigString, settings);
-            foreach (var node in (config.nodes ?? new JSONConfigNode[0]))
-            {
-                var pollNode = Activator.CreateInstance(typeof(PollingEngine).Assembly.GetType(node.type), new object[] { node.name, node.settings }) as PollNode;
-                PollingEngine.TryAdd(pollNode);
-            }
-            PollingEngine.StartPolling();
 
+            // config Syslog listener
             if (config.syslog.listenerEnabled)
             {
                 var listener = new SyslogListener();
@@ -89,6 +41,15 @@ namespace NSysmon.Collector
                 startListener.BeginInvoke(config.syslog.listenerPort, null, null);
             }
 
+            // config PollEngine
+            foreach (var node in (config.nodes ?? new JSONConfigNode[0]))
+            {
+                var pollNode = Activator.CreateInstance(typeof(PollingEngine).Assembly.GetType(node.type), new object[] { node.name, node.settings }) as PollNode;
+                PollingEngine.TryAdd(pollNode);
+            }
+            PollingEngine.StartPolling();
+
+            // config HTTP API
             var hostConfig = new HttpSelfHostConfiguration("http://127.0.0.1:" + config.http.listenerPort);
             // Remove the XML formatter
             hostConfig.Formatters.Remove(hostConfig.Formatters.XmlFormatter);

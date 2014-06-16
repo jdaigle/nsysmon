@@ -19,7 +19,6 @@
             <tr>
                 <th>Node Type</th>
                 <th>Unique key</th>
-                <th>Monitor Status</th>
                 <th>Poller Count</th>
                 <th>Last Poll (duration)</th>
                 <th>Poll Task Status</th>
@@ -33,7 +32,6 @@
                     <td>
                         <a href="~/Api/node/@(HttpUtility.UrlEncode((string)node.NodeType))/@(HttpUtility.UrlEncode((string)node.UniqueKey))/status">@node.UniqueKey</a>
                     </td>
-                    <td>@node.MonitorStatus.ToString() - @node.MonitorStatusReason</td>
                     <td>@node.PollerCount</td>
                     <td title="@(((DateTime?)node.LastPoll).ToRelativeTime())">@(((DateTime?)node.LastPoll).ToRelativeTime()) (@node.LastPollDuration.TotalMilliseconds ms)</td>
                     <td>@node.PollTaskStatus</td>

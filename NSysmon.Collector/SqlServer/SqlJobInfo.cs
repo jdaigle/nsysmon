@@ -10,58 +10,10 @@ using Newtonsoft.Json;
 /// </remarks>
 namespace NSysmon.Collector.SqlServer
 {
-    public class SqlJobInfo : ISQLVersionedObject, IMonitorStatus
+    public class SqlJobInfo : ISQLVersionedObject
     {
         [JsonIgnore]
         public Version MinVersion { get { return SqlServerVersions.SQL2005.RTM; } }
-
-        public MonitorStatus MonitorStatus
-        {
-            get
-            {
-                return !IsEnabled
-                           ? MonitorStatus.Warning
-                           : IsRunning
-                                 ? MonitorStatus.Good
-                                 : LastRunMonitorStatus;
-            }
-        }
-        public string MonitorStatusReason
-        {
-            get
-            {
-                if (!IsEnabled)
-                {
-                    return Name + " - Not enabled";
-                }
-                if (IsRunning || LastRunMonitorStatus == MonitorStatus.Good)
-                {
-                    return null;
-                }
-                return Name + " - Last run: " +
-                       (LastRunStatus.HasValue ? LastRunStatus.Value.GetDescription() : "unknown");
-            }
-        }
-
-        public MonitorStatus LastRunMonitorStatus
-        {
-            get
-            {
-                if (!LastRunStatus.HasValue) return MonitorStatus.Unknown;
-                switch (LastRunStatus.Value)
-                {
-                    case JobStatuses.Succeeded:
-                        return MonitorStatus.Good;
-                    case JobStatuses.Retry:
-                    case JobStatuses.Canceled:
-                        return MonitorStatus.Warning;
-                    case JobStatuses.Failed:
-                        return MonitorStatus.Critical;
-                    default:
-                        throw new ArgumentOutOfRangeException("", "LastRunStatus was not recognized");
-                }
-            }
-        }
 
         public Guid JobId { get; internal set; }
         public string Name { get; internal set; }

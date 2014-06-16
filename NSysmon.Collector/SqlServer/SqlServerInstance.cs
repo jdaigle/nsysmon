@@ -52,18 +52,6 @@ namespace NSysmon.Collector.SqlServer
             }
         }
 
-        protected override IEnumerable<MonitorStatus> GetMonitorStatus()
-        {
-            if (Databases != null && Databases.ContainsCachedData())
-            {
-                yield return Databases.Data.GetWorstStatus();
-            }
-        }
-        protected override string GetMonitorStatusReason()
-        {
-            return (Databases != null && Databases.ContainsCachedData()) ? Databases.Data.GetReasonSummary() : null;
-        }
-
         /// <summary>
         /// Gets a connection for this server - YOU NEED TO DISPOSE OF IT
         /// </summary>
@@ -80,34 +68,27 @@ namespace NSysmon.Collector.SqlServer
             return ISQLVersionedObjectSingletons.TryGetValue(typeof(T), out lookup) ? lookup.GetFetchSQL(Version) : null;
         }
 
-        public PollNodeDataCache<List<T>> SqlCacheList<T>(int cacheSeconds,
-                                             int? cacheFailureSeconds = null,
-                                             bool affectsStatus = true,
+        public PollNodeDataCache<List<T>> SqlCacheList<T>(
+                                             int cacheForSeconds = 0,
+                                             int? cacheFailureForSeconds = null,
                                              [CallerMemberName] string memberName = "",
                                              [CallerFilePath] string sourceFilePath = "",
                                              [CallerLineNumber] int sourceLineNumber = 0)
            where T : class, ISQLVersionedObject
         {
-            return new PollNodeDataCache<List<T>>(memberName, sourceFilePath, sourceLineNumber)
-            {
-                AffectsNodeStatus = affectsStatus,
-                CacheForSeconds = cacheSeconds,
-                CacheFailureForSeconds = cacheFailureSeconds,
-                UpdateCachedData = UpdateFromSql(typeof(T).Name + "-List", conn => conn.Query<T>(GetFetchSQL<T>()).ToList())
-            };
+            var getData = UpdateFromSql(conn => conn.Query<T>(GetFetchSQL<T>()).ToList());
+            return new PollNodeDataCache<List<T>>(this, getData, cacheForSeconds, cacheFailureForSeconds, typeof(T).Name + "-List");
         }
 
-        public Action<PollNodeDataCache<T>> UpdateFromSql<T>(string opName, Func<SqlConnection, T> getFromConnection) where T : class
+        public Func<T> UpdateFromSql<T>(Func<SqlConnection, T> getFromConnection) where T : class
         {
-            return UpdateCachedData(description: "SQL Fetch: " + Name + ":" + opName,
-                                    getData: () =>
-                                    {
-                                        using (var conn = GetConnection())
-                                        {
-                                            return getFromConnection(conn);
-                                        }
-                                    },
-                                    addExceptionData: e => e.AddLoggedData("Server", Name));
+            return () =>
+            {
+                using (var conn = GetConnection())
+                {
+                    return getFromConnection(conn);
+                }
+            };
         }
 
         private PollNodeDataCache<SqlServerWindowsInfo> _windowsProperties;
@@ -115,14 +96,15 @@ namespace NSysmon.Collector.SqlServer
         {
             get
             {
-                return _windowsProperties ?? (_windowsProperties = new PollNodeDataCache<SqlServerWindowsInfo>()
-                {
-                    CacheForSeconds = 60,
-                    UpdateCachedData = UpdateFromSql("dm_os_windows_info", conn =>
+                return _windowsProperties ?? (_windowsProperties = new PollNodeDataCache<SqlServerWindowsInfo>(
+                    this
+                    , UpdateFromSql(conn =>
                     {
                         return conn.Query<SqlServerWindowsInfo>(SqlServerWindowsInfo.FetchSQL).FirstOrDefault();
                     })
-                });
+                    , cacheForSeconds: 60 * 5
+                    , description: "dm_os_windows_info"
+                    ));
             }
         }
 
@@ -131,10 +113,9 @@ namespace NSysmon.Collector.SqlServer
         {
             get
             {
-                return _serverProperties ?? (_serverProperties = new PollNodeDataCache<SqlServerProperties>()
-                {
-                    CacheForSeconds = 60,
-                    UpdateCachedData = UpdateFromSql("Properties", conn =>
+                return _serverProperties ?? (_serverProperties = new PollNodeDataCache<SqlServerProperties>(
+                    this
+                    , UpdateFromSql(conn =>
                     {
                         var result = conn.Query<SqlServerProperties>(SqlServerProperties.FetchSQL).FirstOrDefault();
                         if (result != null)
@@ -143,7 +124,9 @@ namespace NSysmon.Collector.SqlServer
                         }
                         return result;
                     })
-                });
+                    , cacheForSeconds: 60 * 5
+                    , description: "Properties"
+                    ));
             }
         }
 
@@ -152,10 +135,9 @@ namespace NSysmon.Collector.SqlServer
         {
             get
             {
-                return _configuration ?? (_configuration = new PollNodeDataCache<List<SqlConfigurationOption>>
-                {
-                    CacheForSeconds = 2 * 60,
-                    UpdateCachedData = UpdateFromSql("Configuration", conn =>
+                return _configuration ?? (_configuration = new PollNodeDataCache<List<SqlConfigurationOption>>(
+                    this
+                    , UpdateFromSql(conn =>
                     {
                         var result = conn.Query<SqlConfigurationOption>(SqlConfigurationOption.FetchSQL).ToList();
                         foreach (var r in result)
@@ -168,7 +150,9 @@ namespace NSysmon.Collector.SqlServer
                         }
                         return result;
                     })
-                });
+                    , cacheForSeconds: 60 * 5
+                    , description: "Configuration"
+                    ));
             }
         }
 
@@ -181,25 +165,25 @@ namespace NSysmon.Collector.SqlServer
         private PollNodeDataCache<List<SqlDatabaseInfo>> _databases;
         public PollNodeDataCache<List<SqlDatabaseInfo>> Databases
         {
-            get { return _databases ?? (_databases = SqlCacheList<SqlDatabaseInfo>(5 * 60)); }
+            get { return _databases ?? (_databases = SqlCacheList<SqlDatabaseInfo>(60 * 5)); }
         }
 
         private PollNodeDataCache<List<SqlDatabaseFileInfo>> _databaseFiles;
         public PollNodeDataCache<List<SqlDatabaseFileInfo>> DatabaseFiles
         {
-            get { return _databaseFiles ?? (_databaseFiles = SqlCacheList<SqlDatabaseFileInfo>(5 * 60)); }
+            get { return _databaseFiles ?? (_databaseFiles = SqlCacheList<SqlDatabaseFileInfo>(60 * 5)); }
         }
 
         private PollNodeDataCache<List<SqlDatabaseBackupInfo>> _databaseBackups;
         public PollNodeDataCache<List<SqlDatabaseBackupInfo>> DatabaseBackups
         {
-            get { return _databaseBackups ?? (_databaseBackups = SqlCacheList<SqlDatabaseBackupInfo>(5 * 60)); }
+            get { return _databaseBackups ?? (_databaseBackups = SqlCacheList<SqlDatabaseBackupInfo>(60 * 5)); }
         }
 
         private PollNodeDataCache<List<SqlDatabaseVLFInfo>> _databaseVLFs;
         public PollNodeDataCache<List<SqlDatabaseVLFInfo>> DatabaseVLFs
         {
-            get { return _databaseVLFs ?? (_databaseVLFs = SqlCacheList<SqlDatabaseVLFInfo>(10 * 60, 60, affectsStatus: false)); }
+            get { return _databaseVLFs ?? (_databaseVLFs = SqlCacheList<SqlDatabaseVLFInfo>(60 * 10, 60)); }
         }
 
         private PollNodeDataCache<List<SqlCPUEvent>> _cpuHistoryLastHour;
@@ -207,10 +191,9 @@ namespace NSysmon.Collector.SqlServer
         {
             get
             {
-                return _cpuHistoryLastHour ?? (_cpuHistoryLastHour = new PollNodeDataCache<List<SqlCPUEvent>>
-                {
-                    CacheForSeconds = 60,
-                    UpdateCachedData = UpdateFromSql("CPUHistoryLastHour", conn =>
+                return _cpuHistoryLastHour ?? (_cpuHistoryLastHour = new PollNodeDataCache<List<SqlCPUEvent>>(
+                    this
+                    , UpdateFromSql(conn =>
                     {
                         var sql = GetFetchSQL<SqlCPUEvent>();
                         var result = conn.Query<SqlCPUEvent>(sql, new { maxEvents = 60 })
@@ -219,14 +202,16 @@ namespace NSysmon.Collector.SqlServer
                         //CurrentCPUPercent = result.Count > 0 ? result.Last().ProcessUtilization : (int?)null;
                         return result;
                     })
-                });
+                    , cacheForSeconds: 60
+                    , description: "CPUHistoryLastHour"
+                    ));
             }
         }
 
         private PollNodeDataCache<List<SqlJobInfo>> _jobSummary;
         public PollNodeDataCache<List<SqlJobInfo>> JobSummary
         {
-            get { return _jobSummary ?? (_jobSummary = SqlCacheList<SqlJobInfo>(2 * 60)); }
+            get { return _jobSummary ?? (_jobSummary = SqlCacheList<SqlJobInfo>(60 * 2)); }
         }
 
         private PollNodeDataCache<List<TraceFlagInfo>> _traceFlags;
@@ -240,15 +225,16 @@ namespace NSysmon.Collector.SqlServer
         {
             get
             {
-                return _perfCounters ?? (_perfCounters = new PollNodeDataCache<List<PerfCounterRecord>>
-                {
-                    CacheForSeconds = 20,
-                    UpdateCachedData = UpdateFromSql("PerfCounters", conn =>
+                return _perfCounters ?? (_perfCounters = new PollNodeDataCache<List<PerfCounterRecord>>(
+                    this
+                    , UpdateFromSql(conn =>
                     {
                         var sql = GetFetchSQL<PerfCounterRecord>();
                         return conn.Query<PerfCounterRecord>(sql, new { maxEvents = 60 }).ToList();
                     })
-                });
+                    , cacheForSeconds: 20
+                    , description: "PerfCounters"
+                    ));
             }
         }
 
