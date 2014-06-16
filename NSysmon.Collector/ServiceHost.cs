@@ -37,6 +37,7 @@ namespace NSysmon.Collector
             public JSONConfigSyslog()
             {
                 listenerEnabled = true;
+                listenerPort = 514;
             }
 
             public bool listenerEnabled { get; set; }
@@ -88,7 +89,7 @@ namespace NSysmon.Collector
             {
                 var listener = new SyslogListener();
                 Action<int> startListener = listener.Start;
-                startListener.BeginInvoke(514, null, null);
+                startListener.BeginInvoke(config.syslog.listenerPort, null, null);
             }
 
             var hostConfig = new HttpSelfHostConfiguration("http://127.0.0.1:" + config.http.listenerPort);

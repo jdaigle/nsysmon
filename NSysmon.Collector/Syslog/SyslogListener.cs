@@ -33,20 +33,6 @@ namespace NSysmon.Collector.Syslog
                             {
                                 datagram.Handle();
                             }
-                            //var haproxySyslogMessage = HAProxySyslogMessage.Parse(syslogMessage, sourceIPAddress.ToString());
-                            //if (haproxySyslogMessage != null)
-                            //{
-                            //    Log.Debug("Message is HAProxy: " + syslogMessage);
-                            //    using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["HAProxyLogs"].ConnectionString))
-                            //    {
-                            //        connection.Open();
-                            //        haproxySyslogMessage.WriteToDatabase(connection);
-                            //    }
-                            //}
-                            //else
-                            //{
-                            //    Log.Debug("Message is not HAProxy: " + syslogMessage);
-                            //}
                         }
                         catch (Exception e)
                         {
