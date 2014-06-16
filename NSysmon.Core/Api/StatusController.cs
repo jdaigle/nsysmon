@@ -15,11 +15,67 @@ using System.Web.Http;
 using System.Web.UI.DataVisualization.Charting;
 using System.Web.UI.WebControls;
 using NSysmon.Core.WMI;
+using NWhisper;
 
 namespace NSysmon.Core.Api
 {
     public class StatusController : ApiController
     {
+        [Route("api/counters")]
+        public CounterListViewModel GetCounterList()
+        {
+            var viewModel = new CounterListViewModel();
+            var dictionary = PerfMon.CounterDictionary.ReadFromFile(@"C:\temp\Counters\index.dat");
+            foreach (var counter in dictionary)
+            {
+                var path = string.Format(@"c:\temp\counters\{0}.dat", counter.CounterId);
+                var header = NWhisper.Whipser.Info(path);
+                viewModel.Counters.Add(new CounterListViewModel.Counter()
+                {
+                    CounterId = counter.CounterId,
+                    Hostname = counter.Hostname,
+                    PerformanceCounterCategory = counter.PerformanceCounterCategory,
+                    PerformanceCounterName = counter.PerformanceCounterName,
+                    PerformanceCounterInstance = counter.PerformanceCounterInstance,
+                    Path = path,
+                    MaxRetention = header.MaxRetention,
+                });
+            }
+            viewModel.Counters =
+                viewModel.Counters
+                    .OrderBy(x => x.Hostname)
+                    .ThenBy(x => x.PerformanceCounterCategory)
+                    .ThenBy(x => x.PerformanceCounterInstance)
+                    .ThenBy(x => x.PerformanceCounterName)
+                    .ToList();
+            return viewModel;
+        }
+
+        [Route("api/counter/{id}")]
+        public HttpResponseMessage GetCounterGraph(Guid id)
+        {
+            var path = string.Format(@"c:\temp\counters\{0}.dat", id);
+            var header = NWhisper.Whipser.Info(path);
+            var from = DateTime.UtcNow.AddMinutes(-30).ToUnixTime();
+            var data = NWhisper.Whipser.Fetch(path, from).Value;
+
+            var chart = GetChart();
+            var area = GetRouteChartArea(true, data.ValueList.Max(x => x.value) * 1.25);
+            var series = GetSparkSeries("Values");
+            chart.Series.Add(series);
+            foreach (var item in data.ValueList.Where(x => x.Timestamp >= from).OrderBy(x => x.Timestamp))
+            {
+                series.Points.Add(new DataPoint(item.Timestamp.FromUnixTime().ToLocalTime().ToOADate(), item.value));
+            }
+            chart.ChartAreas.Add(area);
+
+            var result = new HttpResponseMessage(HttpStatusCode.OK);
+            result.Content = new ByteArrayContent(ToByteArray(chart));
+            result.Content.Headers.ContentType =
+                new MediaTypeHeaderValue("image/png");
+            return result;
+        }
+
         [Route("api/nodes")]
         public NodeListViewModel GetNodeList(bool? includeData = false)
         {
@@ -142,30 +198,40 @@ namespace NSysmon.Core.Api
                 //InnerPlotPosition = new ElementPosition(0, 0, 100, 100),
                 AxisY =
                 {
-                    Minimum = 0,
-                    MaximumAutoSize = 100,
-                    LabelStyle = { Enabled = true },
-                    Interval = 10,
-                    IntervalAutoMode = IntervalAutoMode.VariableCount,
-                    MajorGrid = { Enabled = false },
-                    MajorTickMark = { Enabled = false },
-                    LineWidth = 0,
-                    LineDashStyle = ChartDashStyle.Dot,
+                    LineColor = Color.White,
+                    LabelStyle = { Font = new Font("Trebuchet MS", 2.25f) },
+                    MajorGrid = { LineColor = ColorTranslator.FromHtml("#e6e6e6") },
+                    MinorGrid = { Enabled = false, LineColor = ColorTranslator.FromHtml("#e6e6e6") },
+                    //Minimum = 0,
+                    //MaximumAutoSize = 100,
+                    //LabelStyle = { Enabled = true },
+                    //Interval = 10,
+                    //IntervalAutoMode = IntervalAutoMode.FixedCount,
+                    //MajorGrid = { Enabled = false },
+                    //MajorTickMark = { Enabled = false },
+                    //LineWidth = 0,
+                    //LineDashStyle = ChartDashStyle.Dot,
                 },
                 AxisX =
                 {
-                    MaximumAutoSize = 100,
-                    LabelStyle = { Enabled = true, Format = "HH:mm:ss" },
-                    LineWidth = 0,
-                    MajorTickMark = { Enabled = false },
-                    //Maximum = DateTime.UtcNow.ToOADate(),
-                    //Minimum = DateTime.UtcNow.AddDays(-NodeStatus.GetDaysFromView(ViewRange.Summary)).ToOADate(),
-                    MajorGrid = { Enabled = false }
+                    LineColor = Color.White,
+                    LabelStyle = { Font = new Font("Trebuchet MS", 8.25f), Angle = -90, Format = "HH:mm:ss" },
+                    MajorGrid = { LineColor = ColorTranslator.FromHtml("#e6e6e6") },
+                    MinorGrid = { Enabled = false, LineColor = ColorTranslator.FromHtml("#e6e6e6") },
+                    //IsMarginVisible = false,
+                    //LabelAutoFitStyle = LabelAutoFitStyles.DecreaseFont,
+                    //MaximumAutoSize = 100,
+                    //LabelStyle = { Enabled = true, Format = "HH:mm:ss" },
+                    //LineWidth = 0,
+                    //MajorTickMark = { Enabled = false },
+                    ////Maximum = DateTime.UtcNow.ToOADate(),
+                    ////Minimum = DateTime.UtcNow.AddDays(-NodeStatus.GetDaysFromView(ViewRange.Summary)).ToOADate(),
+                    //MajorGrid = { Enabled = false }
                 }
             };
 
-            if (max.HasValue)
-                area.AxisY.Maximum = max.Value;
+            //if (max.HasValue)
+            //    area.AxisY.Maximum = max.Value;
 
             return area;
         }
@@ -211,12 +277,12 @@ namespace NSysmon.Core.Api
             color = color ?? Color.SteelBlue;
             return new Series(name)
             {
-                ChartType = SeriesChartType.Area,
+                ChartType = SeriesChartType.Line,
                 XValueType = ChartValueType.DateTime,
-                Color = ColorTranslator.FromHtml("#c6d5e2"),
-                EmptyPointStyle = { Color = Color.Transparent, BackSecondaryColor = Color.Transparent },
-                IsValueShownAsLabel = true,
-                IsVisibleInLegend = true,
+                //Color = ColorTranslator.FromHtml("#c6d5e2"),
+                //EmptyPointStyle = { Color = Color.Transparent, BackSecondaryColor = Color.Transparent },
+                //IsValueShownAsLabel = false,
+                //IsVisibleInLegend = false,
             };
         }
 
@@ -236,12 +302,12 @@ namespace NSysmon.Core.Api
         {
             return new Chart
             {
-                BackColor = Color.Transparent,
-                Height = Unit.Pixel(height ?? 250),
-                Width = Unit.Pixel(width ?? 500),
+                //BackColor = Color.Transparent,
+                Height = Unit.Pixel(height ?? 100),
+                Width = Unit.Pixel(width ?? 540),
                 AntiAliasing = AntiAliasingStyles.All,
                 TextAntiAliasingQuality = TextAntiAliasingQuality.High,
-                Palette = ChartColorPalette.None
+                //Palette = ChartColorPalette.None
             };
         }
 

@@ -104,7 +104,6 @@ namespace NSysmon.Forwarder
             {
                 this.AddPerformanceCounter("Network Interface", "Bytes Received/Sec", instance);
                 this.AddPerformanceCounter("Network Interface", "Bytes Sent/Sec", instance);
-                this.AddPerformanceCounter("Network Interface", "Current Bandwidth", instance);
             }
             if (IncludeSQLServerCounters)
             {

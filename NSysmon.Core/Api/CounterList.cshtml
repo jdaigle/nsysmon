@@ -1,0 +1,39 @@
+﻿@model NSysmon.Core.Api.CounterListViewModel
+@using System.Web
+@using NSysmon.Core
+@using NSysmon.Core.Api
+@{
+    var counters = (List<CounterListViewModel.Counter>)Model.Counters;
+}
+<html>
+<head>
+    <title>Counter List</title>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>Host</th>
+                <th>Category</th>
+                <th>Counter</th>
+                <th>Instance</th>
+                <th>Image</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (CounterListViewModel.Counter node in counters)
+            {
+                <tr>
+                    <td>@node.Hostname</td>
+                    <td>@node.PerformanceCounterCategory</td>
+                    <td>@node.PerformanceCounterName</td>
+                    <td>@node.PerformanceCounterInstance</td>
+                    <td>
+                        <img src="~/api/counter/@(HttpUtility.UrlEncode(node.CounterId.ToString()))" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>

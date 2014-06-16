@@ -52,6 +52,9 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="NWhisper">
+      <HintPath>..\..\nwhipser\NWhisper\bin\Debug\NWhisper.dll</HintPath>
+    </Reference>
     <Reference Include="RazorEngine">
       <HintPath>..\packages\RazorEngine.3.4.1\lib\net45\RazorEngine.dll</HintPath>
     </Reference>
@@ -89,6 +92,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Api\ApiExceptionFilterAttribute.cs" />
+    <Compile Include="Api\CounterListViewModel.cs" />
     <Compile Include="Api\NodeListViewModel.cs" />
     <Compile Include="Api\NodeStatusViewModel.cs" />
     <Compile Include="Api\RazorFormatter.cs" />
@@ -152,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Api\NodeList.cshtml" />
+    <EmbeddedResource Include="Api\CounterList.cshtml" />
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>

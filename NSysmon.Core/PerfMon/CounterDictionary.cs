@@ -8,7 +8,8 @@ using Newtonsoft.Json;
 
 namespace NSysmon.Core.PerfMon
 {
-    public class CounterDictionary
+    [JsonObject]
+    public class CounterDictionary : IEnumerable<CounterDictionaryKey>
     {
         public CounterDictionary()
         {
@@ -18,8 +19,7 @@ namespace NSysmon.Core.PerfMon
         [JsonIgnore]
         public string Path { get; private set; }
 
-        [JsonProperty]
-        private Dictionary<string, CounterDictionaryKey> Counters { get; set; }
+        public Dictionary<string, CounterDictionaryKey> Counters { get; set; }
 
         public Guid GetCounterIdOrNew(string hostname, string category, string name, string instance)
         {
@@ -50,6 +50,16 @@ namespace NSysmon.Core.PerfMon
         public static void WriteToFile(string path, CounterDictionary dictionary)
         {
             File.WriteAllText(path, JsonConvert.SerializeObject(dictionary, Formatting.Indented));
+        }
+
+        public IEnumerator<CounterDictionaryKey> GetEnumerator()
+        {
+            return Counters.Values.GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return Counters.Values.GetEnumerator();
         }
     }
 }
