@@ -63,9 +63,6 @@ namespace NSysmon.Collector
             }
         }
 
-        /// <summary>
-        /// What do you think it does?
-        /// </summary>
         public static void StartPolling()
         {
             _startTime = DateTime.UtcNow;

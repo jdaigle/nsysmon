@@ -22,7 +22,7 @@ namespace NSysmon.Collector.Syslog
         public override void Handle()
         {
             base.Handle();
-            PerfMon.Instance.Publish(Node_Name, this.SentDateTime, PerformanceCounterCategory, PerformanceCounterName, PerformanceCounterInstance, PerformanceCounterValue);
+            PerfMon.PerfMonFile.Instance.Publish(Node_Name, this.SentDateTime, PerformanceCounterCategory, PerformanceCounterName, PerformanceCounterInstance, PerformanceCounterValue);
         }
     }
 }

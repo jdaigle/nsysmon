@@ -33,17 +33,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Atomic">
-      <HintPath>..\packages\Disruptor.1.1.0\lib\net40\Atomic.dll</HintPath>
-    </Reference>
     <Reference Include="Dapper">
       <HintPath>..\packages\Dapper.1.13\lib\net45\Dapper.dll</HintPath>
-    </Reference>
-    <Reference Include="Disruptor">
-      <HintPath>..\packages\Disruptor.1.1.0\lib\net40\Disruptor.dll</HintPath>
-    </Reference>
-    <Reference Include="Disruptor.Scheduler">
-      <HintPath>..\packages\Disruptor.1.1.0\lib\net40\Disruptor.Scheduler.dll</HintPath>
     </Reference>
     <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -102,9 +93,7 @@
     <Compile Include="ObjectExtensions.cs" />
     <Compile Include="PerfMon\CounterDictionary.cs" />
     <Compile Include="PerfMon\CounterDictionaryKey.cs" />
-    <Compile Include="PerfMon\CounterValue.cs" />
-    <Compile Include="PerfMon\PerfMonHandler.cs" />
-    <Compile Include="PerfMon\Instance.cs" />
+    <Compile Include="PerfMon\PerfMonFile.cs" />
     <Compile Include="PingResult.cs" />
     <Compile Include="PollNodeDataCache.cs" />
     <Compile Include="DateTimeExtensions.cs" />
