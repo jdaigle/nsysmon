@@ -8,10 +8,9 @@ namespace NSysmon.Forwarder
 {
     public class PerformanceCounters : List<PerformanceCounter>
     {
-        public PerformanceCounters(string machine, bool includeSQLServerCounters = false)
+        public PerformanceCounters(string machine)
         {
             this.Machine = machine;
-            this.IncludeSQLServerCounters = includeSQLServerCounters;
             this.SetupCounters();
         }
 
@@ -105,15 +104,12 @@ namespace NSysmon.Forwarder
                 this.AddPerformanceCounter("Network Interface", "Bytes Received/Sec", instance);
                 this.AddPerformanceCounter("Network Interface", "Bytes Sent/Sec", instance);
             }
-            if (IncludeSQLServerCounters)
-            {
-                this.AddPerformanceCounter("SQLServer:Buffer Manager", "Page life expectancy", "");
-                this.AddPerformanceCounter("SQLServer:General Statistics", "User Connections", "");
-                this.AddPerformanceCounter("SQLServer:Memory Manager", "Memory Grants Pending", "");
-                this.AddPerformanceCounter("SQLServer:SQL Statistics", "Batch Requests/sec", "");
-                this.AddPerformanceCounter("SQLServer:SQL Statistics", "SQL Compilations/sec", "");
-                this.AddPerformanceCounter("SQLServer:SQL Statistics", "SQL Re-Compilations/sec", "");
-            }
+            this.AddPerformanceCounter("SQLServer:Buffer Manager", "Page life expectancy", "");
+            this.AddPerformanceCounter("SQLServer:General Statistics", "User Connections", "");
+            this.AddPerformanceCounter("SQLServer:Memory Manager", "Memory Grants Pending", "");
+            this.AddPerformanceCounter("SQLServer:SQL Statistics", "Batch Requests/sec", "");
+            this.AddPerformanceCounter("SQLServer:SQL Statistics", "SQL Compilations/sec", "");
+            this.AddPerformanceCounter("SQLServer:SQL Statistics", "SQL Re-Compilations/sec", "");
             foreach (var instance in GetCounterCategoryInstanceNames("ASP.NET Applications"))
             {
                 if (instance == "__Total__")
