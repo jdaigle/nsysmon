@@ -1,10 +1,10 @@
 ﻿{
     "nodes": [
         {
-            "type": "NSysmon.Core.WMI.WindowsServerNode",
+            "type": "NSysmon.Collector.WMI.WindowsServerNode",
             "name": "localhost",
             "settings": {
-                "$type": "NSysmon.Core.WMI.WindowsServerNodeSettings, NSysmon.Core",
+                "$type": "NSysmon.Collector.WMI.WindowsServerNodeSettings, NSysmon.Collector",
                 "Host": "127.0.0.1",
                 "WMIPollingSettings": {
                     "QueryTimeout": 30000,
@@ -14,16 +14,17 @@
             }
         },
         {
-            "type": "NSysmon.Core.SqlServer.SqlServerInstance",
+            "type": "NSysmon.Collector.SqlServer.SqlServerInstance",
             "name": "localhost",
             "settings": {
-                "$type": "NSysmon.Core.SqlServer.SqlServerInstanceSettings, NSysmon.Core",
+                "$type": "NSysmon.Collector.SqlServer.SqlServerInstanceSettings, NSysmon.Collector",
                 "ConnectionString": "server=localhost;database=master;trusted_connection=true;"
             }
         }
     ],
     "syslog": {
-        "listenerEnabled": true
+        "listenerEnabled": true,
+        "listenerPort": 8514
     },
     "http": {
         "listenerPort": 8080
