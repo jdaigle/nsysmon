@@ -24,9 +24,9 @@ namespace NSysmon.Collector
                 });
                 x.RunAsPrompt();
                 x.StartAutomaticallyDelayed();
-                x.SetDescription("NSysmon Daemon");
-                x.SetDisplayName("NSysmon Daemon");
-                x.SetServiceName("NSysmon");
+                x.SetDescription("NSysmon Collector");
+                x.SetDisplayName("NSysmon Collector");
+                x.SetServiceName("NSysmonCollector");
             });
         }
     }
