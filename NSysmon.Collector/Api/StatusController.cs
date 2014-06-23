@@ -14,6 +14,7 @@ using System.Web;
 using System.Web.Http;
 using System.Web.UI.DataVisualization.Charting;
 using System.Web.UI.WebControls;
+using NSysmon.Collector.HAProxy;
 using NSysmon.Collector.WMI;
 using NWhisper;
 
@@ -150,6 +151,28 @@ namespace NSysmon.Collector.Api
                 objects.Add(cachedData);
             }
             return objects.ToArray();
+        }
+
+        [Route("api/haproxy/counters")]
+        public IEnumerable<HAProxyCounter> GetHAProxyCounters(string nodeKey)
+        {
+            var node = PollingEngine.GetNode("HAProxy", nodeKey) as HAProxyNode;
+            if (node == null)
+            {
+                return Enumerable.Empty<HAProxyCounter>();
+            }
+            return node.Counters.OrderBy(x => x.Key);
+        }
+
+        [Route("api/haproxy/counters/keys")]
+        public IEnumerable<string> GetHAProxyCounterKeys(string nodeKey)
+        {
+            var node = PollingEngine.GetNode("HAProxy", nodeKey) as HAProxyNode;
+            if (node == null)
+            {
+                return Enumerable.Empty<string>();
+            }
+            return node.Counters.Select(x => x.Key).OrderBy(x => x);
         }
 
         [Route("api/graphs")]

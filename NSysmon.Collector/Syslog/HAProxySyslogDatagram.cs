@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using NSysmon.Collector.HAProxy;
 
 namespace NSysmon.Collector.Syslog
 {
@@ -10,6 +12,16 @@ namespace NSysmon.Collector.Syslog
     {
         public HAProxySyslogDatagram(string datagram, int severity, int facility, DateTime sentDateTime, string sourceIPAddress)
             : base(datagram, severity, facility, sentDateTime, sourceIPAddress) { }
+
+        public override void Handle()
+        {
+            var node = PollingEngine.GetNode("HAProxy", Node_Name) as HAProxyNode;
+            if (node != null)
+            {
+                node.Count("Client IP: " + Client_IP, this);
+                node.Count("URL: " + this.GetUnique_HTTP_Request_URL(), this);
+            }
+        }
 
         public string Node_Name;
 
@@ -145,6 +157,7 @@ namespace NSysmon.Collector.Syslog
         public string Host;
         public string X_Forwarded_For;
         public string Accept_Encoding;
+        public long Content_Length;
 
         // Response Headers
         public string Content_Encoding;
@@ -154,5 +167,25 @@ namespace NSysmon.Collector.Syslog
         public string HTTP_Request_URL;
         public string HTTP_Request_Query;
         public string HTTP_Request_Version;
+
+        public string GetUnique_HTTP_Request_URL()
+        {
+            var url = HTTP_Request_URL;
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return url;
+            }
+            // remove GUIDs
+            url = Regex.Replace(url,
+                             @"\b[A-F0-9]{8}(?:-[A-F0-9]{4}){3}-[A-F0-9]{12}\b",
+                             "{guid}",
+                             RegexOptions.IgnoreCase);
+            // remove Integers
+            url = Regex.Replace(url,
+                             @"\b\d{1,}\b",
+                             "{integer}",
+                             RegexOptions.IgnoreCase);
+            return url;
+        }
     }
 }
