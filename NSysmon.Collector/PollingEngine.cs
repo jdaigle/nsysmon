@@ -156,7 +156,7 @@ namespace NSysmon.Collector
 
         public static PollNode GetNode(string type, string key)
         {
-            return AllPollNodes.FirstOrDefault(pn => string.Equals(pn.NodeType, type, StringComparison.InvariantCultureIgnoreCase) && pn.UniqueKey == key);
+            return AllPollNodes.FirstOrDefault(pn => string.Equals(pn.NodeType, type, StringComparison.InvariantCultureIgnoreCase) && string.Equals(pn.UniqueKey, key, StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }
