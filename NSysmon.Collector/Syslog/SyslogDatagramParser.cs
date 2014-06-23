@@ -9,33 +9,43 @@ namespace NSysmon.Collector.Syslog
 {
     public static class SyslogDatagramParser
     {
+        public static log4net.ILog Log = log4net.LogManager.GetLogger(typeof(SyslogDatagramParser));
+
         public static SyslogDatagram Parse(string datagram, string sourceIPAddress)
         {
-            if (datagram[0] != '<' || datagram.IndexOf(">") < 0)
+            try
             {
-                return null;
-            }
-            int pri = ParsePriority(datagram);
-            int pri_severity = 0;
-            int pri_facility = 0;
-            pri_facility = Math.DivRem(pri, 8, out pri_severity);
-            var i = datagram.IndexOf(">");
-            var datepart1 = ParseString(datagram, i, ' ', out i);
-            var datepart2 = ParseString(datagram, i, ' ', out i);
-            var datepart3 = ParseString(datagram, i, ' ', out i);
-            var datagramDateTime = DateTime.ParseExact(datepart1 + " " + datepart2 + " " + datepart3, "MMM dd HH:mm:ss", DateTimeFormatInfo.InvariantInfo);
+                if (datagram[0] != '<' || datagram.IndexOf(">") < 0)
+                {
+                    return null;
+                }
+                int pri = ParsePriority(datagram);
+                int pri_severity = 0;
+                int pri_facility = 0;
+                pri_facility = Math.DivRem(pri, 8, out pri_severity);
+                var i = datagram.IndexOf(">");
+                var datepart1 = ParseString(datagram, i, ' ', out i);
+                var datepart2 = ParseString(datagram, i, ' ', out i);
+                var datepart3 = ParseString(datagram, i, ' ', out i);
+                var datagramDateTime = DateTime.ParseExact(datepart1 + " " + datepart2 + " " + datepart3, "MMM dd HH:mm:ss", DateTimeFormatInfo.InvariantInfo);
 
-            // get type of message
-            if (datagram.IndexOf("haproxy[", StringComparison.InvariantCultureIgnoreCase) > 0)
-            {
-                return ParseHAProxySyslogDatagram(datagram, pri_severity, pri_facility, datagramDateTime, sourceIPAddress);
+                // get type of message
+                if (datagram.IndexOf("haproxy[", StringComparison.InvariantCultureIgnoreCase) > 0)
+                {
+                    return ParseHAProxySyslogDatagram(datagram, pri_severity, pri_facility, datagramDateTime, sourceIPAddress);
+                }
+                else if (datagram.IndexOf("NSysmon.Forwarder[", StringComparison.InvariantCultureIgnoreCase) > 0)
+                {
+                    return ParsePerformanceCounterDatagram(datagram, pri_severity, pri_facility, datagramDateTime, sourceIPAddress);
+                }
+                else
+                {
+                    return null;
+                }
             }
-            else if (datagram.IndexOf("NSysmon.Forwarder[", StringComparison.InvariantCultureIgnoreCase) > 0)
+            catch (Exception e)
             {
-                return ParsePerformanceCounterDatagram(datagram, pri_severity, pri_facility, datagramDateTime, sourceIPAddress);
-            }
-            else
-            {
+                Log.Error("Error Parsing Syslog Message: [" + datagram + "]", e);
                 return null;
             }
         }
