@@ -24,9 +24,10 @@ namespace NSysmon.Collector.Syslog
                     var receiveBuffer = udpListener.Receive(ref sourceIPAddress);
                     Task.Factory.StartNew(() =>
                     {
+                        string syslogDatagram = "";
                         try
                         {
-                            var syslogDatagram = Encoding.ASCII.GetString(receiveBuffer);
+                            syslogDatagram = Encoding.ASCII.GetString(receiveBuffer);
                             Log.DebugFormat("Received Datagram From IP [{0}] : {1}", sourceIPAddress.ToString(), syslogDatagram);
                             var datagram = SyslogDatagramParser.Parse(syslogDatagram, sourceIPAddress.ToString());
                             if (datagram != null)
@@ -36,7 +37,7 @@ namespace NSysmon.Collector.Syslog
                         }
                         catch (Exception e)
                         {
-                            Log.Error(e);
+                            Log.Error("Error Handling Syslog Message: [" + syslogDatagram + "]", e);
                             throw;
                         }
                     });
