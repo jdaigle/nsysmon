@@ -59,7 +59,7 @@ namespace NSysmon.Collector.Syslog
         /// <summary>
         /// total number of bytes transmitted to the client when the log is emitted. This does include HTTP headers.
         /// </summary>
-        public int Bytes_Read;
+        public long Bytes_Read;
 
         public string Captured_Request_Cookie;
 

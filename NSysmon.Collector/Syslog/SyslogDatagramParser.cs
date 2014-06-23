@@ -98,7 +98,7 @@ namespace NSysmon.Collector.Syslog
             parsedDatagram.Tr = ParseInt(datagram, i, '/', out i);
             parsedDatagram.Tt = ParseInt(datagram, i, ' ', out i);
             parsedDatagram.Status_Code = ParseInt(datagram, i, ' ', out i);
-            parsedDatagram.Bytes_Read = ParseInt(datagram, i, ' ', out i);
+            parsedDatagram.Bytes_Read = ParseLong(datagram, i, ' ', out i);
             parsedDatagram.Captured_Request_Cookie = ParseString(datagram, i, ' ', out i);
             parsedDatagram.Captured_Response_Cookie = ParseString(datagram, i, ' ', out i);
             parsedDatagram.Termination_State = ParseString(datagram, i, ' ', out i);
@@ -208,6 +208,14 @@ namespace NSysmon.Collector.Syslog
             var s = ParseString(datagram, start_i, endChar, out i);
             end_i = i;
             return int.Parse(s);
+        }
+
+        public static long ParseLong(string datagram, int start_i, char endChar, out int end_i)
+        {
+            var i = start_i;
+            var s = ParseString(datagram, start_i, endChar, out i);
+            end_i = i;
+            return long.Parse(s);
         }
 
         public static float ParseFloat(string datagram, int start_i, char endChar, out int end_i)
