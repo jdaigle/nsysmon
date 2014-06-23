@@ -24,8 +24,8 @@ namespace NSysmon.Collector.SqlServer
         protected string connectionString;
         public Version Version { get; internal set; }
 
-        public SqlServerInstance(string nodeName, SqlServerInstanceSettings settings)
-            : base(nodeName)
+        public SqlServerInstance(string nodeName, IEnumerable<string> groups, SqlServerInstanceSettings settings)
+            : base(nodeName, groups)
         {
             Version = new Version(); // default to 0.0
             this.Name = nodeName;

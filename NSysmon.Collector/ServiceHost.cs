@@ -44,7 +44,7 @@ namespace NSysmon.Collector
             // config PollEngine
             foreach (var node in (config.nodes ?? new JSONConfigNode[0]))
             {
-                var pollNode = Activator.CreateInstance(typeof(PollingEngine).Assembly.GetType(node.type), new object[] { node.name, node.settings }) as PollNode;
+                var pollNode = Activator.CreateInstance(typeof(PollingEngine).Assembly.GetType(node.type), new object[] { node.name, node.groups ?? new string[0], node.settings }) as PollNode;
                 PollingEngine.TryAdd(pollNode);
             }
             PollingEngine.StartPolling();

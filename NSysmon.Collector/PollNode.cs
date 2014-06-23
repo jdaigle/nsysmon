@@ -19,10 +19,13 @@ namespace NSysmon.Collector
         /// </summary>
         public string UniqueKey { get; private set; }
 
-        protected PollNode(string uniqueKey)
+        protected PollNode(string uniqueKey, IEnumerable<string> groups)
         {
             UniqueKey = uniqueKey;
+            this.Groups = groups.ToList().AsReadOnly();
         }
+
+        public IReadOnlyList<string> Groups { get; private set; }
 
         private static log4net.ILog Logger = log4net.LogManager.GetLogger(typeof(PollNode));
 

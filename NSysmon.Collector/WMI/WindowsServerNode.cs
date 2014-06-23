@@ -17,8 +17,8 @@ namespace NSysmon.Collector.WMI
         private readonly WindowsServerNodeSettings settings;
         public string NodeName { get; private set; }
 
-        public WindowsServerNode(string nodeName, WindowsServerNodeSettings settings)
-            : base(nodeName)
+        public WindowsServerNode(string nodeName, IEnumerable<string> groups, WindowsServerNodeSettings settings)
+            : base(nodeName, groups)
         {
             this.NodeName = nodeName;
             this.settings = settings;

@@ -24,6 +24,7 @@ namespace NSysmon.Collector
     {
         public string type { get; set; }
         public string name { get; set; }
+        public string[] groups { get; set; }
         public object settings { get; set; }
     }
 
